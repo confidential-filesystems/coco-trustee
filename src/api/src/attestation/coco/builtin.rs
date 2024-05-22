@@ -24,6 +24,7 @@ impl Attest for Native {
 
 impl Native {
     pub fn new(config: &AsConfig) -> Result<Self> {
+        log::info!("new native attest");
         Ok(Self {
             inner: AttestationService::new(config.clone())?,
         })

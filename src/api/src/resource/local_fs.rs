@@ -6,6 +6,9 @@ use super::{Repository, ResourceDesc};
 use anyhow::{Context, Result};
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
+use log::info;
+use std::process::{Command, Stdio};
+use std::io::{self, Read};
 
 pub const DEFAULT_REPO_DIR_PATH: &str = "/opt/confidential-containers/kbs/repository";
 
@@ -35,12 +38,34 @@ impl Repository for LocalFs {
             "{}/{}/{}",
             resource_desc.repository_name, resource_desc.resource_type, resource_desc.resource_tag
         );
+        info!("read resource {}", ref_resource_path);
+        let mut output = Command::new("cfs-resource")
+            .arg("get")
+            .arg("-d")
+            .arg(&self.repo_dir_path)
+            .arg("-r").arg(resource_desc.repository_name)
+            .arg("-k").arg(resource_desc.resource_type)
+            .arg("-t").arg(resource_desc.resource_tag)
+            .stdout(Stdio::piped())
+            .spawn()?;
+        let mut stdout = output.stdout.take().expect("Failed to take stdout");
+        let mut buffer: Vec<u8> = Vec::new();
+        stdout.read_to_end(&mut buffer)?;
+
+        let status = output.wait()?;
+        if !status.success() {
+            return Err(io::Error::new(io::ErrorKind::Other,
+                                      format!("fail to read {}", ref_resource_path),).into());
+        }
+        Ok(buffer)
+        /*
         resource_path.push(ref_resource_path);
 
         let resource_byte = tokio::fs::read(&resource_path)
             .await
             .context("read resource from local fs")?;
         Ok(resource_byte)
+         */
     }
 
     async fn write_secret_resource(

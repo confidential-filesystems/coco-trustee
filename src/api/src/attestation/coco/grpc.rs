@@ -55,6 +55,7 @@ pub struct Grpc {
 
 impl Grpc {
     pub async fn new(config: &GrpcConfig) -> Result<Self> {
+        log::info!("new gprc attest");
         let as_addr = match &config.as_addr {
             Some(addr) => addr.clone(),
             None => {

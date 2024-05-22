@@ -27,6 +27,7 @@ pub async fn attestation(
     url: &str,
     tee_key_pem: Option<String>,
     kbs_root_certs_pem: Vec<String>,
+    extra_credential_json: String,
 ) -> Result<String> {
     let evidence_provider = Box::new(NativeEvidenceProvider::new()?);
     let mut client_builder = KbsClientBuilder::with_evidence_provider(evidence_provider, url);
@@ -37,8 +38,9 @@ pub async fn attestation(
         client_builder = client_builder.add_kbs_cert(&cert)
     }
     let mut client = client_builder.build()?;
-
-    let (token, _) = client.get_token().await?;
+    let extra_credential = attester::extra_credential::ExtraCredential::from_string(&extra_credential_json)
+        .map_err(|e| anyhow!("{}: {:?}", "fail to parse extra_credential", e))?;
+    let (token, _) = client.get_token(&extra_credential).await?;
 
     Ok(token.content)
 }
@@ -56,6 +58,7 @@ pub async fn get_resource_with_token(
     tee_key_pem: String,
     token: String,
     kbs_root_certs_pem: Vec<String>,
+    extra_credential_json: String,
 ) -> Result<Vec<u8>> {
     let token_provider = Box::<TestTokenProvider>::default();
     let mut client_builder =
@@ -68,8 +71,10 @@ pub async fn get_resource_with_token(
     let mut client = client_builder.build()?;
 
     let resource_kbs_uri = format!("kbs:///{path}");
+    let extra_credential = attester::extra_credential::ExtraCredential::from_string(&extra_credential_json)
+        .map_err(|e| anyhow!("{}: {:?}", "fail to parse extra_credential", e))?;
     let resource_bytes = client
-        .get_resource(serde_json::from_str(&format!("\"{resource_kbs_uri}\""))?)
+        .get_resource(serde_json::from_str(&format!("\"{resource_kbs_uri}\""))?, &extra_credential)
         .await?;
     Ok(resource_bytes)
 }
@@ -85,6 +90,7 @@ pub async fn get_resource_with_attestation(
     path: &str,
     tee_key_pem: Option<String>,
     kbs_root_certs_pem: Vec<String>,
+    extra_credential_json: String,
 ) -> Result<Vec<u8>> {
     let evidence_provider = Box::new(NativeEvidenceProvider::new()?);
     let mut client_builder = KbsClientBuilder::with_evidence_provider(evidence_provider, url);
@@ -98,8 +104,10 @@ pub async fn get_resource_with_attestation(
     let mut client = client_builder.build()?;
 
     let resource_kbs_uri = format!("kbs:///{path}");
+    let extra_credential = attester::extra_credential::ExtraCredential::from_string(&extra_credential_json)
+        .map_err(|e| anyhow!("{}: {:?}", "fail to parse extra_credential", e))?;
     let resource_bytes = client
-        .get_resource(serde_json::from_str(&format!("\"{resource_kbs_uri}\""))?)
+        .get_resource(serde_json::from_str(&format!("\"{resource_kbs_uri}\""))?, &extra_credential)
         .await?;
     Ok(resource_bytes)
 }

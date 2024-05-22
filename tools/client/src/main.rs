@@ -54,6 +54,9 @@ enum Commands {
         /// and the public part of TEE Key should be consistent with tee-pubkey in the token.
         #[clap(long, value_parser)]
         attestation_token: Option<PathBuf>,
+
+        #[clap(long, value_parser)]
+        extra_credential_file: Option<PathBuf>,
     },
 
     /// Attestation and get attestation results token
@@ -65,6 +68,9 @@ enum Commands {
         /// KBS client will generate a new TEE Key pair internally.
         #[clap(long, value_parser)]
         tee_key_file: Option<PathBuf>,
+
+        #[clap(long, value_parser)]
+        extra_credential_file: Option<PathBuf>,
     },
 }
 
@@ -129,18 +135,23 @@ async fn main() -> Result<()> {
     };
 
     match cli.command {
-        Commands::Attest { tee_key_file } => {
+        Commands::Attest { tee_key_file, extra_credential_file } => {
             let tee_key = match tee_key_file {
                 Some(f) => Some(std::fs::read_to_string(f)?),
                 None => None,
             };
-            let token = kbs_client::attestation(&cli.url, tee_key, kbs_cert.clone()).await?;
+            let extra_credential = match extra_credential_file {
+                Some(f) => Some(std::fs::read_to_string(f)?),
+                None => Some(attester::extra_credential::ExtraCredential::default().to_string()?),
+            };
+            let token = kbs_client::attestation(&cli.url, tee_key, kbs_cert.clone(), extra_credential.unwrap()).await?;
             println!("{token}");
         }
         Commands::GetResource {
             path,
             tee_key_file,
             attestation_token,
+            extra_credential_file,
         } => {
             let tee_key = match tee_key_file {
                 Some(f) => Some(std::fs::read_to_string(f)?),
@@ -149,6 +160,10 @@ async fn main() -> Result<()> {
             let token = match attestation_token {
                 Some(t) => Some(std::fs::read_to_string(t)?.trim().to_string()),
                 None => None,
+            };
+            let extra_credential = match extra_credential_file {
+                Some(f) => Some(std::fs::read_to_string(f)?),
+                None => Some(attester::extra_credential::ExtraCredential::default().to_string()?),
             };
 
             if token.is_some() {
@@ -161,6 +176,7 @@ async fn main() -> Result<()> {
                     tee_key.unwrap(),
                     token.unwrap(),
                     kbs_cert.clone(),
+                    extra_credential.unwrap(),
                 )
                 .await?;
                 println!("{}", STANDARD.encode(resource_bytes));
@@ -170,6 +186,7 @@ async fn main() -> Result<()> {
                     &path,
                     tee_key,
                     kbs_cert.clone(),
+                    extra_credential.unwrap(),
                 )
                 .await?;
                 println!("{}", STANDARD.encode(resource_bytes));

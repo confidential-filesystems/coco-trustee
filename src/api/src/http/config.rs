@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 use super::*;
+use std::process::Command;
 
 #[cfg(feature = "as")]
 /// POST /attestation-policy
@@ -91,17 +92,6 @@ pub(crate) async fn set_resource(
     insecure: web::Data<bool>,
     repository: web::Data<Arc<RwLock<dyn Repository + Send + Sync>>>,
 ) -> Result<HttpResponse> {
-    if !insecure.get_ref() {
-        let user_pub_key = user_pub_key
-            .as_ref()
-            .as_ref()
-            .ok_or(Error::UserPublicKeyNotProvided)?;
-
-        validate_auth(&request, user_pub_key).map_err(|e| {
-            Error::FailedAuthentication(format!("Requester is not an authorized user: {e}"))
-        })?;
-    }
-
     let resource_description = ResourceDesc {
         repository_name: request
             .match_info()
@@ -119,6 +109,32 @@ pub(crate) async fn set_resource(
             .ok_or_else(|| Error::InvalidRequest(String::from("no `tag` in url")))?
             .to_string(),
     };
+
+    let is_cfs_resource = resource_description.resource_type == "seeds"
+        && resource_description.resource_tag == "seeds";
+    if !insecure.get_ref() {
+        if is_cfs_resource {
+            // validate seeds
+            let output = Command::new("cfs-resource")
+                .arg("verify")
+                .arg("-s")
+                .arg(String::from_utf8_lossy(data.as_ref()).into_owned())
+                .output()
+                .expect("failed to execute process");
+            if !output.status.success() {
+                return Err(Error::SetSecretFailed(format!("{} seeds are invalid", resource_description.repository_name)));
+            }
+        } else {
+            let user_pub_key = user_pub_key
+                .as_ref()
+                .as_ref()
+                .ok_or(Error::UserPublicKeyNotProvided)?;
+
+            validate_auth(&request, user_pub_key).map_err(|e| {
+                Error::FailedAuthentication(format!("Requester is not an authorized user: {e}"))
+            })?;
+        }
+    }
 
     set_secret_resource(&repository, resource_description, data.as_ref())
         .await

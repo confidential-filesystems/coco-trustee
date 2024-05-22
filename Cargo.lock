@@ -404,7 +404,7 @@ dependencies = [
  "actix-web-httpauth",
  "aes-gcm",
  "anyhow",
- "as-types",
+ "as-types 0.1.0 (git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0)",
  "async-trait",
  "attestation-service",
  "base64 0.21.4",
@@ -437,6 +437,15 @@ dependencies = [
  "tonic",
  "tonic-build",
  "uuid",
+]
+
+[[package]]
+name = "as-types"
+version = "0.1.0"
+dependencies = [
+ "kbs-types",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -502,10 +511,9 @@ dependencies = [
 [[package]]
 name = "attestation-service"
 version = "0.1.0"
-source = "git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0#e050dd8c3077abc0caa42fedab7dc0b5dc42c2d9"
 dependencies = [
  "anyhow",
- "as-types",
+ "as-types 0.1.0",
  "asn1-rs",
  "async-trait",
  "az-snp-vtpm 0.3.0",
@@ -523,6 +531,7 @@ dependencies = [
  "hex",
  "jsonwebtoken",
  "jwt",
+ "jwt-simple",
  "kbs-types",
  "lazy_static",
  "log",
@@ -2423,7 +2432,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "api-server",
- "as-types",
+ "as-types 0.1.0 (git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0)",
  "base64 0.21.4",
  "clap 4.4.6",
  "env_logger 0.10.0",

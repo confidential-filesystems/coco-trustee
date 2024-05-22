@@ -76,13 +76,13 @@ impl PolicyEngineInterface for Opa {
             p: input_claims.as_ptr() as *const c_char,
             n: input_claims.len() as isize,
         };
-
+        log::debug!("TT Evaluate: policy: {:?}, resource_path: {:?}, input_claims: {:?}", self.policy_path.to_str(), resource_path, input_claims);
         // Call the function exported by cgo and process the returned decision
         let decision_buf: *mut c_char =
             unsafe { evaluateGo(policy_go, resource_path_go, input_go) };
         let decision_str: &CStr = unsafe { CStr::from_ptr(decision_buf) };
         let res = decision_str.to_str()?.to_string();
-        log::debug!("Evaluated: {}", res);
+        log::info!("TT Evaluated: {}", res);
         if res.starts_with("Error::") {
             return Err(anyhow!(res));
         }

@@ -18,3 +18,4 @@ FROM ubuntu:22.04
 LABEL org.opencontainers.image.source="https://github.com/confidential-containers/kbs"
 
 COPY --from=builder /usr/local/cargo/bin/kbs /usr/local/bin/kbs
+COPY tools/resource/cfs-resource /usr/local/bin/cfs-resource

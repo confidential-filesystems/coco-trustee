@@ -87,13 +87,21 @@ pub(crate) async fn get_resource(
             resource_description.resource_type,
             resource_description.resource_tag
         );
-        policy_engine
+        let res = policy_engine
             .0
             .lock()
             .await
             .evaluate(resource_path, claims_str)
             .await
             .map_err(|e| Error::PolicyEngineFailed(e.to_string()))?;
+        if res.0 {
+            info!("allow to access the resource");
+        } else {
+            info!("deny to access the resource");
+            return Err(Error::PolicyEngineFailed(
+                "Policy engine denied the request".to_string(),
+            ));
+        }
     }
 
     let resource_byte = repository
