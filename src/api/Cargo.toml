@@ -28,8 +28,8 @@ anyhow.workspace = true
 async-trait.workspace = true
 #as-types = { git = "https://github.com/confidential-containers/attestation-service.git", tag = "v0.8.0" }
 #attestation-service = { git = "https://github.com/confidential-containers/attestation-service.git", tag = "v0.8.0", default-features = false, optional = true }
-as-types = {path = "../../../attestation-service/as-types"}
-attestation-service = { path = "../../../attestation-service/attestation-service", default-features = false, optional = true }
+as-types = {path = "../../../coco-attestation-service/as-types"}
+attestation-service = { path = "../../../coco-attestation-service/attestation-service", default-features = false, optional = true }
 base64.workspace = true
 cfg-if.workspace = true
 clap = { version = "4.3.21", features = ["derive", "env"] }
@@ -39,7 +39,7 @@ jsonwebtoken = { version = "8", default-features = false, optional = true }
 jwt-simple = "0.11.6"
 # TODO: change it to "0.5", once released.
 #kbs-types = { git = "https://github.com/virtee/kbs-types", rev = "c90df0e" }
-kbs-types = { path = "../../../kbs-types"}
+kbs-types = { path = "../../../virtee-kbs-types"}
 lazy_static = "1.4.0"
 log.workspace = true
 prost = { version = "0.11", optional = true }

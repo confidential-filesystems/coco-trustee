@@ -15,7 +15,7 @@ path = "src/main.rs"
 [dependencies]
 # TODO: change it to "0.8.0", once released.
 #as-types = { git = "https://github.com/confidential-containers/attestation-service.git", tag = "v0.8.0", default-features = false }
-as-types = {path = "../../../attestation-service/as-types"}
+as-types = {path = "../../../coco-attestation-service/as-types"}
 anyhow.workspace = true
 api-server.workspace = true
 base64.workspace = true
@@ -23,8 +23,8 @@ clap = { version = "4.0.29", features = ["derive"] }
 env_logger.workspace = true
 jwt-simple = "0.11.4"
 #kbs_protocol = { git = "https://github.com/confidential-containers/guest-components", tag = "v0.8.0" }
-kbs_protocol = { path = "../../../guest-components/attestation-agent/kbs_protocol"}
-attester = { path = "../../../guest-components/attestation-agent/attester", default-features = false }
+kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
+attester = { path = "../../../coco-guest-components/attestation-agent/attester", default-features = false }
 log.workspace = true
 reqwest = { version = "0.11.18", default-features = false, features = ["cookies", "json"] }
 serde = { version = "1.0", features = ["derive"] }
