@@ -404,7 +404,7 @@ dependencies = [
  "actix-web-httpauth",
  "aes-gcm",
  "anyhow",
- "as-types 0.1.0 (git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0)",
+ "as-types",
  "async-trait",
  "attestation-service",
  "base64 0.21.4",
@@ -442,16 +442,6 @@ dependencies = [
 [[package]]
 name = "as-types"
 version = "0.1.0"
-dependencies = [
- "kbs-types",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "as-types"
-version = "0.1.0"
-source = "git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0#e050dd8c3077abc0caa42fedab7dc0b5dc42c2d9"
 dependencies = [
  "kbs-types",
  "serde",
@@ -513,7 +503,7 @@ name = "attestation-service"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "as-types 0.1.0",
+ "as-types",
  "asn1-rs",
  "async-trait",
  "az-snp-vtpm 0.3.0",
@@ -563,7 +553,6 @@ dependencies = [
 [[package]]
 name = "attester"
 version = "0.1.0"
-source = "git+https://github.com/confidential-containers/guest-components?tag=v0.8.0#e849dc8921d2a48bec915f1a7c02f8988721022d"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -580,6 +569,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sev",
+ "sha2",
  "strum 0.25.0",
  "tdx-attest-rs",
  "tokio",
@@ -1278,7 +1268,6 @@ checksum = "7a81dae078cea95a014a339291cec439d2f232ebe854a9d672b796c6afafa9b7"
 [[package]]
 name = "crypto"
 version = "0.1.0"
-source = "git+https://github.com/confidential-containers/guest-components?tag=v0.8.0#e849dc8921d2a48bec915f1a7c02f8988721022d"
 dependencies = [
  "aes-gcm",
  "anyhow",
@@ -2432,7 +2421,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "api-server",
- "as-types 0.1.0 (git+https://github.com/confidential-containers/attestation-service.git?tag=v0.8.0)",
+ "as-types",
+ "attester",
  "base64 0.21.4",
  "clap 4.4.6",
  "env_logger 0.10.0",
@@ -2448,7 +2438,6 @@ dependencies = [
 [[package]]
 name = "kbs-types"
 version = "0.4.0"
-source = "git+https://github.com/virtee/kbs-types?rev=c90df0e#c90df0eb6575a63df015d7e700e26227e646bd0a"
 dependencies = [
  "serde",
  "serde_json",
@@ -2457,7 +2446,6 @@ dependencies = [
 [[package]]
 name = "kbs_protocol"
 version = "0.1.0"
-source = "git+https://github.com/confidential-containers/guest-components?tag=v0.8.0#e849dc8921d2a48bec915f1a7c02f8988721022d"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3624,7 +3612,6 @@ dependencies = [
 [[package]]
 name = "resource_uri"
 version = "0.1.0"
-source = "git+https://github.com/confidential-containers/guest-components?tag=v0.8.0#e849dc8921d2a48bec915f1a7c02f8988721022d"
 dependencies = [
  "anyhow",
  "serde",

@@ -9,6 +9,7 @@ use std::path::{Path, PathBuf};
 use log::info;
 use std::process::{Command, Stdio};
 use std::io::{self, Read};
+use attestation_service::cfs;
 
 pub const DEFAULT_REPO_DIR_PATH: &str = "/opt/confidential-containers/kbs/repository";
 
@@ -39,6 +40,16 @@ impl Repository for LocalFs {
             resource_desc.repository_name, resource_desc.resource_type, resource_desc.resource_tag
         );
         info!("read resource {}", ref_resource_path);
+
+        // only for test
+        let cfsi = cfs::Cfs::new("".to_string())?;
+        let set_res = cfsi.set_resource(ref_resource_path.clone(), "test-data-1".to_string())
+            .await?;
+        info!("confilesystem - cfsi.set_resource() -> set_res = {:?}", set_res);
+        let get_res = cfsi.get_resource(ref_resource_path.clone())
+            .await?;
+        info!("confilesystem - cfsi.get_resource() -> get_res = {:?}", get_res);
+
         let mut output = Command::new("cfs-resource")
             .arg("get")
             .arg("-d")
