@@ -43,10 +43,15 @@ impl Repository for LocalFs {
 
         // only for test
         let cfsi = cfs::Cfs::new("".to_string())?;
-        let set_res = cfsi.set_resource(ref_resource_path.clone(), "test-data-1".to_string())
+        let set_res = cfsi.set_resource(resource_desc.repository_name.clone(),
+                                        resource_desc.resource_type.clone(),
+                                        resource_desc.resource_tag.clone(),
+                                        "test-data-1".to_string())
             .await?;
         info!("confilesystem - cfsi.set_resource() -> set_res = {:?}", set_res);
-        let get_res = cfsi.get_resource(ref_resource_path.clone())
+        let get_res = cfsi.get_resource(resource_desc.repository_name.clone(),
+                                        resource_desc.resource_type.clone(),
+                                        resource_desc.resource_tag.clone())
             .await?;
         info!("confilesystem - cfsi.get_resource() -> get_res = {:?}", get_res);
 
