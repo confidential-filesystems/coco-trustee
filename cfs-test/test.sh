@@ -16,16 +16,21 @@ export LD_LIBRARY_PATH=./cfs-test/lib
 # kbs client
 
 # set
+export ResPath=default/test/file1
+
+echo "haha-whf8934ht8y4f9h~83hrhhe~2hfh3tr-123" > ./cfs-test/file1
+
 target/release/kbs-client \
   --url http://127.0.0.1:11111 \
   config --auth-private-key ./cfs-test/private.key \
-  set-resource --resource-file ./cfs-test/file1 --path default/test/file1
+  set-resource --resource-file ./cfs-test/file1 \
+  --path ${ResPath}
 
 # get
+
 target/release/kbs-client \
   --url http://127.0.0.1:11111  \
-  get-resource \
-  --path default/test/file1 \
-  --extra-credential-file ./cfs-test/extra_credential_file
+  get-resource --extra-credential-file ./cfs-test/extra_credential_file \
+  --path ${ResPath}
 
 #end.

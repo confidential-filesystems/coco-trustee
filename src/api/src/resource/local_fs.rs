@@ -28,11 +28,20 @@ impl Default for LocalFsRepoDesc {
 
 pub struct LocalFs {
     pub repo_dir_path: String,
+    pub cfsi: cfs::Cfs,
 }
 
 #[async_trait::async_trait]
 impl Repository for LocalFs {
     async fn read_secret_resource(&self, resource_desc: ResourceDesc) -> Result<Vec<u8>> {
+        let get_res = self.cfsi.get_resource(resource_desc.repository_name.clone(),
+                                        resource_desc.resource_type.clone(),
+                                        resource_desc.resource_tag.clone())
+            .await?;
+        info!("confilesystem - cfsi.get_resource() -> get_res = {:?}", get_res);
+        Ok(get_res)
+
+        /*
         let mut resource_path = PathBuf::from(&self.repo_dir_path);
 
         let ref_resource_path = format!(
@@ -40,20 +49,6 @@ impl Repository for LocalFs {
             resource_desc.repository_name, resource_desc.resource_type, resource_desc.resource_tag
         );
         info!("read resource {}", ref_resource_path);
-
-        // only for test
-        let cfsi = cfs::Cfs::new("".to_string())?;
-        let set_res = cfsi.set_resource(resource_desc.repository_name.clone(),
-                                        resource_desc.resource_type.clone(),
-                                        resource_desc.resource_tag.clone(),
-                                        "test-data-1".to_string())
-            .await?;
-        info!("confilesystem - cfsi.set_resource() -> set_res = {:?}", set_res);
-        let get_res = cfsi.get_resource(resource_desc.repository_name.clone(),
-                                        resource_desc.resource_type.clone(),
-                                        resource_desc.resource_tag.clone())
-            .await?;
-        info!("confilesystem - cfsi.get_resource() -> get_res = {:?}", get_res);
 
         let mut output = Command::new("cfs-resource")
             .arg("get")
@@ -74,6 +69,7 @@ impl Repository for LocalFs {
                                       format!("fail to read {}", ref_resource_path),).into());
         }
         Ok(buffer)
+        */
         /*
         resource_path.push(ref_resource_path);
 
@@ -89,6 +85,15 @@ impl Repository for LocalFs {
         resource_desc: ResourceDesc,
         data: &[u8],
     ) -> Result<()> {
+        let set_res = self.cfsi.set_resource(resource_desc.repository_name.clone(),
+                                            resource_desc.resource_type.clone(),
+                                            resource_desc.resource_tag.clone(),
+                                            data)
+            .await?;
+        info!("confilesystem - cfsi.set_resource() -> set_res = {:?}", set_res);
+        Ok(())
+
+        /*
         let mut resource_path = PathBuf::from(&self.repo_dir_path);
         resource_path.push(resource_desc.repository_name);
         resource_path.push(resource_desc.resource_type);
@@ -104,6 +109,7 @@ impl Repository for LocalFs {
         tokio::fs::write(resource_path, data)
             .await
             .context("write local fs")
+        */
     }
 }
 
@@ -114,6 +120,7 @@ impl LocalFs {
                 .dir_path
                 .clone()
                 .unwrap_or(DEFAULT_REPO_DIR_PATH.to_string()),
+            cfsi: cfs::Cfs::new("".to_string())?,
         })
     }
 }

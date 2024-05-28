@@ -115,6 +115,12 @@ pub(crate) async fn set_resource(
     if !insecure.get_ref() {
         if is_cfs_resource {
             // validate seeds
+            let cfsi = attestation_service::cfs::Cfs::new("".to_string())
+                .map_err(|e| Error::SetSecretFailed(format!("init cfs error: {e}")))?;
+            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(data.as_ref()).into_owned())
+                .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
+            log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
+            /*
             let output = Command::new("cfs-resource")
                 .arg("verify")
                 .arg("-s")
@@ -124,6 +130,7 @@ pub(crate) async fn set_resource(
             if !output.status.success() {
                 return Err(Error::SetSecretFailed(format!("{} seeds are invalid", resource_description.repository_name)));
             }
+            */
         } else {
             let user_pub_key = user_pub_key
                 .as_ref()
