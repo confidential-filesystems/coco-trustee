@@ -26,6 +26,11 @@ if [ ${Op} = "update" ]; then
   scp -r ${SourceDir}/coco-trustee/src/* \
     ./src/
 
+  echo "" && echo "" && echo ""
+    # rm -rf ./tools/*
+    scp -r ${SourceDir}/coco-trustee/tools/* \
+      ./tools/
+
 fi
 
 # build kbs service
@@ -36,6 +41,7 @@ export LIBSECCOMP_LIB_PATH="${seccomp_install_path}/lib"
 
 rm -f ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so
 rm -f ./target/release/kbs
+rm -f ./target/release/kbs-client
 make background-check-kbs POLICY_ENGINE=opa
 
 echo "" && echo "" && echo ""
@@ -51,6 +57,14 @@ if [ -s ./target/release/kbs ]; then
 	echo "compile kbs succ ."
 else
     echo "ERROR: compile kbs fail !"
+    exit 2;
+fi
+
+echo "" && echo "" && echo ""
+if [ -s ./target/release/kbs-client ]; then
+	echo "compile kbs-client succ ."
+else
+    echo "ERROR: compile kbs-client fail !"
     exit 2;
 fi
 

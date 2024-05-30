@@ -72,6 +72,13 @@ enum Commands {
         #[clap(long, value_parser)]
         extra_credential_file: Option<PathBuf>,
     },
+
+    /// Get kbs evidence
+    #[clap(arg_required_else_help = true)]
+    GetKbsEvidence {
+        #[clap(long, value_parser)]
+        challenge: String,
+    },
 }
 
 #[derive(Args)]
@@ -146,6 +153,10 @@ async fn main() -> Result<()> {
             };
             let token = kbs_client::attestation(&cli.url, tee_key, kbs_cert.clone(), extra_credential.unwrap()).await?;
             println!("{token}");
+        }
+        Commands::GetKbsEvidence { challenge } => {
+            let kbs_evidence = kbs_client::kbs_evidence(&cli.url, kbs_cert.clone(), &challenge).await?;
+            println!("kbs_evidence = {:?}", kbs_evidence);
         }
         Commands::GetResource {
             path,

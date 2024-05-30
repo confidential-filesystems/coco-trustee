@@ -115,6 +115,8 @@ pub struct ApiServer {
     attestation_token_type: AttestationTokenVerifierType,
     #[cfg(feature = "policy")]
     policy_engine_config: PolicyEngineConfig,
+
+    agent_service_url: String,
 }
 
 impl ApiServer {
@@ -133,6 +135,7 @@ impl ApiServer {
         #[cfg(feature = "resource")] repository_config: RepositoryConfig,
         #[cfg(feature = "resource")] attestation_token_type: AttestationTokenVerifierType,
         #[cfg(feature = "policy")] policy_engine_config: PolicyEngineConfig,
+        agent_service_url: String,
     ) -> Result<Self> {
         if !insecure && (private_key.is_none() || certificate.is_none()) {
             bail!("Missing HTTPS credentials");
@@ -162,6 +165,7 @@ impl ApiServer {
             attestation_token_type,
             #[cfg(feature = "policy")]
             policy_engine_config,
+            agent_service_url,
         })
     }
 
@@ -265,6 +269,7 @@ impl ApiServer {
         };
 
         let insecure_api = self.insecure_api;
+        let agent_service_url = web::Data::new(self.agent_service_url.clone());
 
         let http_server = HttpServer::new(move || {
             #[allow(unused_mut)]
@@ -277,8 +282,11 @@ impl ApiServer {
             cfg_if::cfg_if! {
                 if #[cfg(feature = "as")] {
                     server_app = server_app.app_data(web::Data::clone(&sessions))
-                    .app_data(web::Data::clone(&attestation_service)).service(web::resource(kbs_path!("auth")).route(web::post().to(http::auth)))
+                    .app_data(web::Data::clone(&attestation_service))
+                    .app_data(web::Data::clone(&agent_service_url))
+                    .service(web::resource(kbs_path!("auth")).route(web::post().to(http::auth)))
                     .service(web::resource(kbs_path!("attest")).route(web::post().to(http::attest)))
+                    .service(web::resource(kbs_path!("evidence")).route(web::get().to(http::get_evidence)))
                     .service(
                         web::resource(kbs_path!("attestation-policy"))
                             .route(web::post().to(http::attestation_policy)),

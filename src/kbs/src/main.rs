@@ -70,6 +70,7 @@ async fn main() -> Result<()> {
         kbs_config.attestation_token_type,
         #[cfg(feature = "opa")]
         kbs_config.policy_engine_config.unwrap_or_default(),
+        kbs_config.agent_service_url,
     )?;
 
     api_server.serve().await.map_err(anyhow::Error::from)

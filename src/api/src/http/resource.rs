@@ -46,6 +46,8 @@ pub(crate) async fn get_resource(
         Error::AttestationClaimsParseFailed(format!("illegal attestation claims: {e}"))
     })?;
 
+    info!("confilesystem - get_resource(): claims = {:?}", claims);
+
     let pkey_value = claims
         .get("tee-pubkey")
         .ok_or(Error::AttestationClaimsParseFailed(String::from(

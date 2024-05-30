@@ -33,4 +33,8 @@ target/release/kbs-client \
   get-resource --extra-credential-file ./cfs-test/extra_credential_file \
   --path ${ResPath}
 
+target/release/kbs-client \
+  --url http://127.0.0.1:11111  \
+  get-kbs-evidence --challenge 123456
+
 #end.

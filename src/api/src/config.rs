@@ -27,6 +27,7 @@ const DEFAULT_INSECURE_API: bool = false;
 const DEFAULT_INSECURE_HTTP: bool = false;
 const DEFAULT_SOCKET: &str = "127.0.0.1:8080";
 const DEFAULT_TIMEOUT: i64 = 5;
+const DEFAULT_AGENT_SERVICE_URL: &str = "http://127.0.0.1:8006";
 
 /// Contains all configurable KBS properties.
 #[derive(Clone, Debug, Deserialize)]
@@ -83,6 +84,9 @@ pub struct KbsConfig {
     /// specific resources.
     #[cfg(feature = "policy")]
     pub policy_engine_config: Option<PolicyEngineConfig>,
+
+    /// kata agent api rest service url.
+    pub agent_service_url: String,
 }
 
 impl TryFrom<&Path> for KbsConfig {
@@ -97,6 +101,7 @@ impl TryFrom<&Path> for KbsConfig {
             .set_default("insecure_http", DEFAULT_INSECURE_HTTP)?
             .set_default("sockets", vec![DEFAULT_SOCKET])?
             .set_default("timeout", DEFAULT_TIMEOUT)?
+            .set_default("agent_service_url", DEFAULT_AGENT_SERVICE_URL)?
             .add_source(File::with_name(config_path.to_str().unwrap()))
             .build()?;
 

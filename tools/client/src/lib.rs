@@ -13,7 +13,7 @@ use kbs_protocol::evidence_provider::NativeEvidenceProvider;
 use kbs_protocol::token_provider::TestTokenProvider;
 use kbs_protocol::KbsClientBuilder;
 use kbs_protocol::KbsClientCapabilities;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 
 const KBS_URL_PREFIX: &str = "kbs/v0";
 
@@ -43,6 +43,38 @@ pub async fn attestation(
     let (token, _) = client.get_token(&extra_credential).await?;
 
     Ok(token.content)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Evidence {
+    #[serde(rename = "tee-pubkey")]
+    pub tee_pubkey: String,
+    #[serde(rename = "evidence")]
+    pub evidence: String,
+}
+
+pub async fn kbs_evidence(
+    url: &str,
+    kbs_root_certs_pem: Vec<String>,
+    challenge: &str,
+) -> Result<Evidence> {
+    let http_client = build_http_client(kbs_root_certs_pem)?;
+    let get_evidence_url = format!("{}/{KBS_URL_PREFIX}/evidence?challenge={}", url, challenge);
+    let get_evidence_response = http_client
+        .get(get_evidence_url)
+        .send()
+        .await?;
+
+    match get_evidence_response.status() {
+        reqwest::StatusCode::OK => {
+            //let rsp = get_evidence_response.text().await?;
+            let rsp = get_evidence_response.json::<Evidence>().await?;
+            Ok(rsp)
+        },
+        _ => {
+            Err(bail!("Request Failed, Response: {:?}", get_evidence_response.text().await?))
+        }
+    }
 }
 
 /// Get secret resources with attestation results token
