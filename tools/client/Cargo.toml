@@ -25,6 +25,7 @@ jwt-simple = "0.11.4"
 #kbs_protocol = { git = "https://github.com/confidential-containers/guest-components", tag = "v0.8.0" }
 kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
 attester = { path = "../../../coco-guest-components/attestation-agent/attester", default-features = false }
+kbs-types = { path = "../../../virtee-kbs-types"}
 log.workspace = true
 reqwest = { version = "0.11.18", default-features = false, features = ["cookies", "json"] }
 serde = { version = "1.0", features = ["derive"] }

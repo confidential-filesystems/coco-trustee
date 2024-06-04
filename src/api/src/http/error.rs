@@ -77,6 +77,12 @@ pub enum Error {
 
     #[error("User public key not provided when launching the KBS")]
     UserPublicKeyNotProvided,
+
+    #[error("Evidence issue failed: {0}")]
+    EvidenceIssueFailed(String),
+
+    #[error("Decrypt resource data failed: {0}")]
+    DecryptResourceDataFailed(String),
 }
 
 /// For example, if we want to raise an error of `MissingCookie`

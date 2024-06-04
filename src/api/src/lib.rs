@@ -52,7 +52,7 @@ pub mod config;
 
 mod auth;
 #[allow(unused_imports)]
-mod http;
+pub mod http;
 
 #[cfg(feature = "resource")]
 mod resource;
@@ -294,7 +294,8 @@ impl ApiServer {
             }}
             cfg_if::cfg_if! {
                 if #[cfg(feature = "resource")] {
-                    server_app = server_app.app_data(web::Data::new(repository.clone()))
+                    server_app = server_app.app_data(web::Data::clone(&sessions))
+                    .app_data(web::Data::new(repository.clone()))
                     .app_data(web::Data::new(token_verifier.clone()))
                     .service(
                         web::resource([

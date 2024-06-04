@@ -59,6 +59,7 @@ tokio.workspace = true
 tonic = { version = "0.9", optional = true }
 uuid = { version = "1.2.2", features = ["serde", "v4"] }
 openssl = { version = "0.10.46", optional = true }
+kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
 
 [dev-dependencies]
 tempfile.workspace = true

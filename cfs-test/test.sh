@@ -23,7 +23,7 @@ echo "haha-whf8934ht8y4f9h~83hrhhe~2hfh3tr-123" > ./cfs-test/file1
 target/release/kbs-client \
   --url http://127.0.0.1:11111 \
   config --auth-private-key ./cfs-test/private.key \
-  set-resource --resource-file ./cfs-test/file1 \
+  set-resource --challenge 123456 --resource-file ./cfs-test/file1 \
   --path ${ResPath}
 
 # get

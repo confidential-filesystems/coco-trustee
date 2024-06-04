@@ -14,6 +14,7 @@ use rand::{thread_rng, Rng};
 use semver::Version;
 use std::collections::HashMap;
 use std::sync::Arc;
+use kbs_protocol::TeeKeyPair;
 use tokio::sync::{Mutex, RwLock};
 use uuid::Uuid;
 
@@ -30,18 +31,42 @@ fn nonce() -> Result<String> {
 }
 
 #[allow(dead_code)]
+#[derive(Clone)]
 pub(crate) struct Session<'a> {
     cookie: Cookie<'a>,
     nonce: String,
     tee: Tee,
     tee_extra_params: Option<String>,
     tee_pub_key: Option<TeePubKey>,
+    tee_key: Option<TeeKeyPair>,
     authenticated: bool,
     attestation_claims: Option<String>,
 }
 
 #[allow(dead_code)]
 impl<'a> Session<'a> {
+    pub fn default() -> Self {
+        let id = Uuid::new_v4().as_simple().to_string();
+        let timeout: i64 = 10;
+        let tee = Tee::Snp;
+        let tee_extra_params = None;
+
+        let cookie = Cookie::build(KBS_SESSION_ID, id.clone())
+            .expires(OffsetDateTime::now_utc() + Duration::minutes(timeout))
+            .finish();
+
+        Session {
+            cookie,
+            nonce: id, // crate::session::nonce()?,
+            tee: tee,
+            tee_extra_params,
+            tee_pub_key: None,
+            tee_key: None,
+            authenticated: false,
+            attestation_claims: None,
+        }
+    }
+
     pub fn from_request(req: &Request, timeout: i64) -> Result<Self> {
         let version = Version::parse(&req.version).map_err(anyhow::Error::from)?;
         if !crate::VERSION_REQ.matches(&version) {
@@ -64,6 +89,7 @@ impl<'a> Session<'a> {
             tee: req.tee.clone(),
             tee_extra_params,
             tee_pub_key: None,
+            tee_key: None,
             authenticated: false,
             attestation_claims: None,
         })
@@ -87,6 +113,10 @@ impl<'a> Session<'a> {
 
     pub fn tee_public_key(&self) -> Option<TeePubKey> {
         self.tee_pub_key.clone()
+    }
+
+    pub fn tee_key(&self) -> Option<TeeKeyPair> {
+        self.tee_key.clone()
     }
 
     pub fn attestation_claims(&self) -> Option<String> {
@@ -115,6 +145,10 @@ impl<'a> Session<'a> {
 
     pub fn set_tee_public_key(&mut self, key: TeePubKey) {
         self.tee_pub_key = Some(key)
+    }
+
+    pub fn set_tee_key(&mut self, key: TeeKeyPair) {
+        self.tee_key = Some(key)
     }
 
     pub fn set_attestation_claims(&mut self, claims: String) {

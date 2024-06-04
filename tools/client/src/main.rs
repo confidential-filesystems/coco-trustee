@@ -119,6 +119,9 @@ enum ConfigCommands {
 
     /// Set confidential resource
     SetResource {
+        #[clap(long, value_parser)]
+        challenge: String,
+
         /// KBS Resource path, e.g my_repo/resource_type/123abc
         /// Document: https://github.com/confidential-containers/attestation-agent/blob/main/docs/KBS_URI.md
         #[clap(long, value_parser)]
@@ -241,12 +244,14 @@ async fn main() -> Result<()> {
                     );
                 }
                 ConfigCommands::SetResource {
+                    challenge,
                     path,
                     resource_file,
                 } => {
                     let resource_bytes = std::fs::read(resource_file)?;
                     kbs_client::set_resource(
                         &cli.url,
+                        &challenge,
                         auth_key.clone(),
                         resource_bytes.clone(),
                         &path,

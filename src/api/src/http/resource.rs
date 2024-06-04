@@ -181,7 +181,8 @@ async fn get_attest_claims_from_header(
 const RSA_ALGORITHM: &str = "RSA1_5";
 const AES_GCM_256_ALGORITHM: &str = "A256GCM";
 
-pub(crate) fn jwe(tee_pub_key: TeePubKey, payload_data: Vec<u8>) -> Result<Response> {
+//pub(crate) fn jwe(tee_pub_key: TeePubKey, payload_data: Vec<u8>) -> Result<Response> {
+pub fn jwe(tee_pub_key: TeePubKey, payload_data: Vec<u8>) -> Result<Response> {
     if tee_pub_key.alg != *RSA_ALGORITHM {
         raise_error!(Error::JWEFailed(format!(
             "algorithm is not {RSA_ALGORITHM} but {}",

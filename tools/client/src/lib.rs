@@ -4,15 +4,17 @@
 
 //! KBS client SDK.
 
+use std::fmt::Debug;
 use anyhow::{anyhow, bail, Result};
 use as_types::SetPolicyInput;
-use base64::engine::general_purpose::STANDARD;
+use base64::engine::general_purpose::{STANDARD};
 use base64::Engine;
 use jwt_simple::prelude::{Claims, Duration, Ed25519KeyPair, EdDSAKeyPairLike};
 use kbs_protocol::evidence_provider::NativeEvidenceProvider;
 use kbs_protocol::token_provider::TestTokenProvider;
 use kbs_protocol::KbsClientBuilder;
 use kbs_protocol::KbsClientCapabilities;
+use kbs_types::{TeePubKey};
 use serde::{Serialize, Deserialize};
 
 const KBS_URL_PREFIX: &str = "kbs/v0";
@@ -48,7 +50,7 @@ pub async fn attestation(
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Evidence {
     #[serde(rename = "tee-pubkey")]
-    pub tee_pubkey: String,
+    pub tee_pubkey: TeePubKey,
     #[serde(rename = "evidence")]
     pub evidence: String,
 }
@@ -68,11 +70,15 @@ pub async fn kbs_evidence(
     match get_evidence_response.status() {
         reqwest::StatusCode::OK => {
             //let rsp = get_evidence_response.text().await?;
+            let cookies = get_evidence_response.cookies();
+            for cookie in cookies.into_iter() {
+                println!("    kbs_evidence(): cookie = {:?}", cookie);
+            }
             let rsp = get_evidence_response.json::<Evidence>().await?;
             Ok(rsp)
         },
         _ => {
-            Err(bail!("Request Failed, Response: {:?}", get_evidence_response.text().await?))
+            bail!("Request Failed, Response: {:?}", get_evidence_response.text().await?)
         }
     }
 }
@@ -240,6 +246,7 @@ pub async fn set_resource_policy(
 /// - kbs_root_certs_pem: Custom HTTPS root certificate of KBS server. It can be left blank.
 pub async fn set_resource(
     url: &str,
+    challenge: &str,
     auth_key: String,
     resource_bytes: Vec<u8>,
     path: &str,
@@ -251,12 +258,48 @@ pub async fn set_resource(
 
     let http_client = build_http_client(kbs_root_certs_pem)?;
 
+    // get evidence
+    let get_evidence_url = format!("{}/{KBS_URL_PREFIX}/evidence?challenge={}", url, challenge);
+    let get_evidence_response = http_client
+        .get(get_evidence_url)
+        .send()
+        .await?;
+
+    match get_evidence_response.status() {
+        reqwest::StatusCode::OK => {
+        
+        },
+        _ => {
+            bail!("Request Failed, Response: {:?}", get_evidence_response.text().await?);
+        }
+    }
+
+    let cookies = get_evidence_response.cookies();
+    let mut last_cookie = "".to_string();
+    for cookie in cookies.into_iter() {
+        println!("set_resource(): kbs_evidence() -> cookie = {:?}", cookie);
+        println!("set_resource(): kbs_evidence() -> cookie.name() = {:?}, cookie.value() = {:?}",
+                 cookie.name(), cookie.value());
+        //last_cookie = cookie.value().clone();
+        last_cookie = format!("{}={}", cookie.name(), cookie.value());
+    }
+    println!("set_resource(): kbs_evidence() -> last_cookie = {:?}", last_cookie);
+
+    //let rsp = get_evidence_response.text().await?;
+    let evidence = get_evidence_response.json::<Evidence>().await?;
+    println!("set_resource(): kbs_evidence() -> evidence = {:?}", evidence);
+
+    let jwe = api_server::http::jwe(evidence.tee_pubkey, resource_bytes)?;
+    let resource_bytes_ciphertext = serde_json::to_vec(&jwe)?;
+
+    //
     let resource_url = format!("{}/{KBS_URL_PREFIX}/resource/{}", url, path);
     let res = http_client
         .post(resource_url)
         .header("Content-Type", "application/octet-stream")
+        .header("Cookie", last_cookie)
         .bearer_auth(token)
-        .body(resource_bytes.clone())
+        .body(resource_bytes_ciphertext.clone())
         .send()
         .await?;
     match res.status() {

@@ -4,6 +4,8 @@
 
 use super::*;
 use std::process::Command;
+use log::info;
+use serde_json::Value;
 
 #[cfg(feature = "as")]
 /// POST /attestation-policy
@@ -87,11 +89,30 @@ pub(crate) async fn resource_policy(
 /// endpoint is insecure and is only meant for testing purposes.
 pub(crate) async fn set_resource(
     request: HttpRequest,
+    map: web::Data<SessionMap<'_>>,
     data: web::Bytes,
     user_pub_key: web::Data<Option<Ed25519PublicKey>>,
     insecure: web::Data<bool>,
     repository: web::Data<Arc<RwLock<dyn Repository + Send + Sync>>>,
 ) -> Result<HttpResponse> {
+    let cookie = request.cookie(KBS_SESSION_ID).ok_or(Error::MissingCookie)?;
+
+    let sessions = map.sessions.read().await;
+    info!("confilesystem - set_resource(): sessions.len() = {:?}", sessions.len());
+    let locked_session = sessions.get(cookie.value()).ok_or(Error::InvalidCookie)?;
+
+    let mut session = locked_session.lock().await;
+    info!("confilesystem - set_resource(): session.id() = {:?}, session.tee_key().is_some() = {:?}",
+        session.id(), session.tee_key().is_some());
+
+    let resource_bytes_cipher = serde_json::from_slice::<kbs_types::Response>(data.as_ref())
+        .map_err(|e| Error::DecryptResourceDataFailed(format!("resource data error: {e}")))?;
+    let resource_bytes = session.tee_key().unwrap().decrypt_response(resource_bytes_cipher)
+        .map_err(|e| Error::DecryptResourceDataFailed(format!("decrypt resource data failed: {e}")))?;
+    let resource_string = String::from_utf8(resource_bytes.clone())
+        .map_err(|e| Error::DecryptResourceDataFailed(format!("get resource string failed: {e}")))?;
+    info!("confilesystem - set_resource(): resource_string = {:?}", resource_string);
+
     let resource_description = ResourceDesc {
         repository_name: request
             .match_info()
@@ -117,7 +138,7 @@ pub(crate) async fn set_resource(
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("init cfs error: {e}")))?;
-            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(data.as_ref()).into_owned())
+            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
             /*
@@ -143,7 +164,7 @@ pub(crate) async fn set_resource(
         }
     }
 
-    set_secret_resource(&repository, resource_description, data.as_ref())
+    set_secret_resource(&repository, resource_description, resource_bytes.as_ref())
         .await
         .map_err(|e| Error::SetSecretFailed(format!("{e}")))?;
     Ok(HttpResponse::Ok().content_type("application/json").body(""))

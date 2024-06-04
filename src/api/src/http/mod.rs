@@ -30,6 +30,8 @@ mod error;
 #[cfg(feature = "resource")]
 mod resource;
 
+mod evidence;
+
 #[cfg(feature = "as")]
 /// RESTful APIs that related to attestation
 pub use attest::*;
@@ -42,3 +44,5 @@ pub use self::config::*;
 pub use resource::*;
 
 pub use error::*;
+
+pub use evidence::*;
