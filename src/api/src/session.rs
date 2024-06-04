@@ -45,21 +45,19 @@ pub(crate) struct Session<'a> {
 
 #[allow(dead_code)]
 impl<'a> Session<'a> {
-    pub fn default() -> Self {
+    pub fn default(timeout_minutes: i64) -> Self {
         let id = Uuid::new_v4().as_simple().to_string();
-        let timeout: i64 = 10;
-        let tee = Tee::Snp;
-        let tee_extra_params = None;
-
         let cookie = Cookie::build(KBS_SESSION_ID, id.clone())
-            .expires(OffsetDateTime::now_utc() + Duration::minutes(timeout))
+            .expires(OffsetDateTime::now_utc() + Duration::minutes(timeout_minutes))
             .finish();
+        let nonce = nonce().unwrap_or_else(|_| id);
+        let tee = Tee::Snp;
 
         Session {
             cookie,
-            nonce: id, // crate::session::nonce()?,
-            tee: tee,
-            tee_extra_params,
+            nonce, // nonce()?,
+            tee,
+            tee_extra_params: None,
             tee_pub_key: None,
             tee_key: None,
             authenticated: false,

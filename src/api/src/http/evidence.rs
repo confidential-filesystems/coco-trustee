@@ -1,5 +1,7 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 use actix_web::{HttpRequest, HttpResponse, web};
+use anyhow::{anyhow, bail};
 use log::info;
 use serde::{Serialize, Deserialize};
 use time::{Duration, OffsetDateTime};
@@ -9,7 +11,6 @@ use kbs_protocol::keypair::TeeKeyPair;
 use kbs_types::TeePubKey;
 use crate::http::Error;
 use crate::session::{Session, SessionMap};
-//use anyhow::*;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Evidence {
@@ -19,28 +20,14 @@ pub struct Evidence {
     pub evidence: String,
 }
 
-/// GET /evidence
+/// GET /evidence?challenge={}
 pub(crate) async fn get_evidence(
-    //attestation: web::Json<Attestation>,
     request: HttpRequest,
     map: web::Data<SessionMap<'_>>,
-    //attestation_service: web::Data<AttestationService>,
     agent_service_url: web::Data<String>,
 ) -> crate::http::Result<HttpResponse> {
     info!("confilesystem - get_evidence(): request = {:?}", request);
-    //info!("confilesystem - get_evidence(): map = {:?}", map);
     info!("confilesystem - get_evidence(): agent_service_url = {:?}", agent_service_url);
-
-    {
-        let sessions = map.sessions.read().await;
-        info!("confilesystem - get_evidence(): sessions.len() = {:?}", sessions.len());
-        for session in sessions.iter() {
-            let mut session_content = session.1.lock().await;
-            info!("    confilesystem - get_evidence(): session.0 = {:?}, session_content.id() = {:?}, session_content.cookie() = {:?}",
-            session.0, session_content.id(), session_content.cookie());
-        }
-    }
-
     {
         //key_test();
     }
@@ -51,12 +38,10 @@ pub(crate) async fn get_evidence(
         .map_err(|e| Error::EvidenceIssueFailed(format!("Export TeePubKey failed {e}")))?;
     let tee_pubkey_str = serde_json::to_string(&tee_pubkey)
         .map_err(|e| Error::EvidenceIssueFailed(format!("Json TeePubKey failed {e}")))?;
-    info!("confilesystem - key_test(): tee_pubkey_str = {:?}", tee_pubkey_str);
 
-    let mut session = Session::default();
+    let mut session = Session::default(30);
     session.set_authenticated();
     session.set_tee_key(tee_key);
-    //let cookie = session.borrow().cookie().clone();
     info!("confilesystem 1- get_evidence(): session.cookie().to_string() = {:?}", session.cookie().to_string());
     map.sessions
         .write()
@@ -64,55 +49,25 @@ pub(crate) async fn get_evidence(
         .insert(session.id().to_string(), Arc::new(Mutex::new(session.clone())));
     info!("confilesystem 2- get_evidence(): ");
 
-    /*
-    let cookie = request.cookie(KBS_SESSION_ID).ok_or(Error::MissingCookie)?;
-
-    let sessions = map.sessions.read().await;
-    let locked_session = sessions.get(cookie.value()).ok_or(Error::InvalidCookie)?;
-
-    let mut session = locked_session.lock().await;
-
-    info!("Cookie {} attestation {:?}", session.id(), attestation);
-
-    if session.is_expired() {
-        raise_error!(Error::ExpiredCookie);
-    }
-
-    let token = attestation_service
-        .0
-        .lock()
+    // get evidence from kata-agent api-server-rest
+    let params: HashMap<String, String> = request
+        .uri()
+        .query()
+        .map(|v| form_urlencoded::parse(v.as_bytes()).into_owned().collect())
+        .unwrap_or_default();
+    info!("confilesystem - get_evidence(): params = {:?}", params);
+    let challenge = params.get("challenge")
+        .ok_or_else(|| Error::InvalidRequest(String::from("no `challenge` in url")))?
+        .to_string();
+    let evidence = get_evidence_from_aa(agent_service_url.as_str(), &challenge, &tee_pubkey_str)
         .await
-        .verify(
-            session.tee(),
-            session.nonce(),
-            &serde_json::to_string(&attestation).unwrap(),
-        )
-        .await
-        .map_err(|e| Error::AttestationFailed(e.to_string()))?;
+        .map_err(|e| Error::EvidenceIssueFailed(format!("Get evidence form AA failed {e}")))?;
+    info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence = {:?}", evidence);
 
-    let claims_b64 = token
-        .split('.')
-        .nth(1)
-        .ok_or_else(|| Error::TokenIssueFailed("Illegal token format".to_string()))?;
-    let claims = String::from_utf8(
-        URL_SAFE_NO_PAD
-            .decode(claims_b64)
-            .map_err(|e| Error::TokenIssueFailed(format!("Illegal token base64 claims: {e}")))?,
-    )
-        .map_err(|e| Error::TokenIssueFailed(format!("Illegal token base64 claims: {e}")))?;
-
-    session.set_tee_public_key(attestation.tee_pubkey.clone());
-    session.set_authenticated();
-    session.set_attestation_claims(claims);
-
-    let body = serde_json::to_string(&json!({
-        "token": token,
-    }))
-        .map_err(|e| Error::TokenIssueFailed(format!("Serialize token failed {e}")))?;
-    */
+    // return evidence and tee_pubkey
     let evidence = Evidence {
-        tee_pubkey: tee_pubkey,
-        evidence: "evidence-rsp".to_string(),
+        tee_pubkey,
+        evidence,
     };
     let evidence_rsp = serde_json::to_string(&evidence)
         .map_err(|e| Error::EvidenceIssueFailed(format!("Serialize evidence failed {e}")))?;
@@ -120,6 +75,60 @@ pub(crate) async fn get_evidence(
         .cookie(session.cookie())
         .content_type("application/json")
         .body(evidence_rsp))
+}
+
+async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubkey: &str) -> anyhow::Result<String> {
+    info!("confilesystem - get_evidence_from_aa(): agent_service_url = {:?}", agent_service_url);
+    info!("confilesystem - get_evidence_from_aa(): challenge = {:?}", challenge);
+    info!("confilesystem - get_evidence_from_aa(): tee_pubkey = {:?}", tee_pubkey);
+
+    let runtime_data = get_runtime_data(challenge, tee_pubkey);
+    info!("confilesystem - get_evidence_from_aa(): runtime_data = {:?}", runtime_data);
+    let http_client = build_http_client(vec![])?;
+    // agent_service_url: http://127.0.0.1:8006
+    // http://127.0.0.1:8006/aa/evidence_extra?runtime_data=123456
+    let get_evidence_url = format!("{}/aa/evidence_extra?runtime_data={}", agent_service_url, runtime_data);
+    info!("confilesystem - get_evidence_from_aa(): get_evidence_url = {:?}", get_evidence_url);
+    let extra_credential = attester::extra_credential::ExtraCredential::new(
+        "".to_string(),
+        "".to_string(),
+        "".to_string(),
+        "controller".to_string(),
+        "".to_string(),
+    );
+    let res = http_client
+        .get(get_evidence_url)
+        .header("Content-Type", "application/json")
+        .json::<attester::extra_credential::ExtraCredential>(&extra_credential)
+        .send()
+        .await?;
+    if res.status() != reqwest::StatusCode::OK {
+        bail!("Request Failed, Response: {:?}", res.text().await?);
+    }
+
+    let evidence = res.text().await?;
+    //let evidence = "aa-evidence-rsp".to_string();
+    info!("confilesystem - get_evidence_from_aa(): evidence = {:?}", evidence);
+    Ok(evidence)
+}
+
+fn get_runtime_data(challenge: &str, tee_pubkey: &str) -> String {
+    //TODO
+    return challenge.to_string();
+}
+
+fn build_http_client(aa_root_certs_pem: Vec<String>) -> anyhow::Result<reqwest::Client> {
+    let mut client_builder =
+        reqwest::Client::builder().user_agent(format!("aa-client/{}", env!("CARGO_PKG_VERSION")));
+
+    for custom_root_cert in aa_root_certs_pem.iter() {
+        let cert = reqwest::Certificate::from_pem(custom_root_cert.as_bytes())?;
+        client_builder = client_builder.add_root_certificate(cert);
+    }
+
+    client_builder
+        .build()
+        .map_err(|e| anyhow!("Build AA http client failed: {:?}", e))
 }
 
 fn key_test() -> anyhow::Result<()> {
