@@ -64,6 +64,7 @@ openssl = { version = "0.10.46", optional = true }
 form_urlencoded = "1.2.0"
 kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
 attester = { path = "../../../coco-guest-components/attestation-agent/attester", default-features = false }
+hex = "0.4.3"
 
 [dev-dependencies]
 tempfile.workspace = true

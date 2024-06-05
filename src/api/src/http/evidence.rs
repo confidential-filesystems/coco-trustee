@@ -114,7 +114,17 @@ async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubk
 
 fn get_runtime_data(challenge: &str, tee_pubkey: &str) -> String {
     //TODO
-    return challenge.to_string();
+    let challenge_tee_pubkey = format!("{challenge}{tee_pubkey}");
+    let runtime_data = attester::emulate::get_hash_48bites(&challenge_tee_pubkey);
+    //let runtime_data_str = String::from_utf8(runtime_data.to_vec()).unwrap();
+    //let runtime_data_str = String::from_utf8_lossy(runtime_data.as_slice()).into_owned();
+    let runtime_data_str = hex::encode(runtime_data.as_slice());
+    let runtime_data_got = hex::decode(runtime_data_str.clone()).unwrap();
+    //let runtime_data_got = runtime_data_str.clone().into_bytes();
+    info!("confilesystem - get_runtime_data(): runtime_data = {:?}", runtime_data);
+    info!("confilesystem - get_runtime_data(): runtime_data_str = {:?}", runtime_data_str);
+    info!("confilesystem - get_runtime_data(): runtime_data_got = {:?}", runtime_data_got);
+    return runtime_data_str;
 }
 
 fn build_http_client(aa_root_certs_pem: Vec<String>) -> anyhow::Result<reqwest::Client> {

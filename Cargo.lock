@@ -414,6 +414,7 @@ dependencies = [
  "config",
  "env_logger 0.10.0",
  "form_urlencoded",
+ "hex",
  "jsonwebtoken",
  "jwt-simple",
  "kbs-types",
