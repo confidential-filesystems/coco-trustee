@@ -48,18 +48,20 @@ pub async fn attestation(
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Evidence {
+pub struct EvidenceRsp {
+    #[serde(rename = "tee-type")]
+    pub tee_type: i32,
     #[serde(rename = "tee-pubkey")]
     pub tee_pubkey: TeePubKey,
     #[serde(rename = "evidence")]
-    pub evidence: String,
+    pub evidence: Vec<u8>,
 }
 
 pub async fn kbs_evidence(
     url: &str,
     kbs_root_certs_pem: Vec<String>,
     challenge: &str,
-) -> Result<Evidence> {
+) -> Result<EvidenceRsp> {
     let http_client = build_http_client(kbs_root_certs_pem)?;
     let get_evidence_url = format!("{}/{KBS_URL_PREFIX}/evidence?challenge={}", url, challenge);
     let get_evidence_response = http_client
@@ -74,7 +76,7 @@ pub async fn kbs_evidence(
             for cookie in cookies.into_iter() {
                 println!("    kbs_evidence(): cookie = {:?}", cookie);
             }
-            let rsp = get_evidence_response.json::<Evidence>().await?;
+            let rsp = get_evidence_response.json::<EvidenceRsp>().await?;
             Ok(rsp)
         },
         _ => {
@@ -286,8 +288,10 @@ pub async fn set_resource(
     println!("set_resource(): kbs_evidence() -> last_cookie = {:?}", last_cookie);
 
     //let rsp = get_evidence_response.text().await?;
-    let evidence = get_evidence_response.json::<Evidence>().await?;
+    let evidence = get_evidence_response.json::<EvidenceRsp>().await?;
     println!("set_resource(): kbs_evidence() -> evidence = {:?}", evidence);
+    println!("set_resource(): kbs_evidence() -> evidence.tee_type = {:?}", evidence.tee_type);
+    println!("set_resource(): kbs_evidence() -> kbs_types::Tee::Challenge = {:?}", kbs_types::Tee::Challenge);
 
     let jwe = api_server::http::jwe(evidence.tee_pubkey, resource_bytes)?;
     let resource_bytes_ciphertext = serde_json::to_vec(&jwe)?;
