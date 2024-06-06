@@ -70,14 +70,41 @@ fi
 
 # run kbs service
 echo "" && echo "" && echo ""
-export AA_EMULATE_ATTESTER=yes
-export CFS_EMULATED_MODE=true
 mkdir -p ./cfs-test/lib
 rm -f ./cfs-test/lib/libcfs.so
+rm -f ./cfs-test/kbs
+rm -f ./cfs-test/kbs-client
 cp ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ./cfs-test/lib/
-export LD_LIBRARY_PATH=${CurrDir}/cfs-test/lib
-./target/release/kbs --config-file ./cfs-test/kbs-config.toml
+cp ./target/release/kbs ./cfs-test/
+cp ./target/release/kbs-client ./cfs-test/
 
+if [ ${Op} = "update" ]; then
+  echo "" && echo "" && echo ""
+  export AA_EMULATE_ATTESTER=yes
+  export CFS_EMULATED_MODE=true
+  export LD_LIBRARY_PATH=${CurrDir}/cfs-test/lib
+  ./target/release/kbs --config-file ./cfs-test/kbs-config.toml
+
+else
+  echo "" && echo "" && echo ""
+  KBSImage=coco-trustee:v0.8.0-filesystem-1
+  docker rmi -f ${KBSImage}
+  docker build -f Dockerfile -t ${KBSImage} .
+
+  KBSContainer=coco-trustee-kbs
+  docker rm -f ${KBSContainer}
+  docker run -itd --privileged \
+  	--name=${KBSContainer} \
+  	--restart=always \
+  	-p 11111:11111 \
+  	${KBSImage} \
+  	/bin/bash
+
+  docker ps -a | grep -i coco-trustee-kbs
+
+  docker exec -it coco-trustee-kbs bash
+
+fi
 
 #
 echo "" && echo "" && echo ""
