@@ -13,11 +13,21 @@ use crate::http::Error;
 use crate::session::{Session, SessionMap};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Evidence {
+pub struct EvidenceAARsp {
+    #[serde(rename = "tee-type")]
+    pub tee_type: i32,
+    #[serde(rename = "evidence")]
+    pub evidence: Vec<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EvidenceRsp {
+    #[serde(rename = "tee-type")]
+    pub tee_type: i32,
     #[serde(rename = "tee-pubkey")]
     pub tee_pubkey: TeePubKey,
     #[serde(rename = "evidence")]
-    pub evidence: String,
+    pub evidence: Vec<u8>,
 }
 
 /// GET /evidence?challenge={}
@@ -59,25 +69,26 @@ pub(crate) async fn get_evidence(
     let challenge = params.get("challenge")
         .ok_or_else(|| Error::InvalidRequest(String::from("no `challenge` in url")))?
         .to_string();
-    let evidence = get_evidence_from_aa(agent_service_url.as_str(), &challenge, &tee_pubkey_str)
+    let evidence_aa_rsp = get_evidence_from_aa(agent_service_url.as_str(), &challenge, &tee_pubkey_str)
         .await
         .map_err(|e| Error::EvidenceIssueFailed(format!("Get evidence form AA failed {e}")))?;
-    info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence = {:?}", evidence);
+    info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence_aa_rsp = {:?}", evidence_aa_rsp);
 
     // return evidence and tee_pubkey
-    let evidence = Evidence {
+    let evidence_rsp = EvidenceRsp {
+        tee_type: evidence_aa_rsp.tee_type,
         tee_pubkey,
-        evidence,
+        evidence: evidence_aa_rsp.evidence,
     };
-    let evidence_rsp = serde_json::to_string(&evidence)
+    let evidence_rsp_str = serde_json::to_string(&evidence_rsp)
         .map_err(|e| Error::EvidenceIssueFailed(format!("Serialize evidence failed {e}")))?;
     Ok(HttpResponse::Ok()
         .cookie(session.cookie())
         .content_type("application/json")
-        .body(evidence_rsp))
+        .body(evidence_rsp_str))
 }
 
-async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubkey: &str) -> anyhow::Result<String> {
+async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubkey: &str) -> anyhow::Result<EvidenceAARsp> {
     info!("confilesystem - get_evidence_from_aa(): agent_service_url = {:?}", agent_service_url);
     info!("confilesystem - get_evidence_from_aa(): challenge = {:?}", challenge);
     info!("confilesystem - get_evidence_from_aa(): tee_pubkey = {:?}", tee_pubkey);
@@ -106,10 +117,9 @@ async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubk
         bail!("Request Failed, Response: {:?}", res.text().await?);
     }
 
-    let evidence = res.text().await?;
-    //let evidence = "aa-evidence-rsp".to_string();
-    info!("confilesystem - get_evidence_from_aa(): evidence = {:?}", evidence);
-    Ok(evidence)
+    let evidence_aa_rsp = res.json::<EvidenceAARsp>().await?;
+    info!("confilesystem - get_evidence_from_aa(): evidence_aa_rsp = {:?}", evidence_aa_rsp);
+    Ok(evidence_aa_rsp)
 }
 
 fn get_runtime_data(challenge: &str, tee_pubkey: &str) -> String {
