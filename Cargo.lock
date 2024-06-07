@@ -432,6 +432,7 @@ dependencies = [
  "semver 1.0.20",
  "serde",
  "serde_json",
+ "sha2",
  "strum 0.25.0",
  "strum_macros 0.24.3",
  "tempfile",

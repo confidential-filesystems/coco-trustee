@@ -9,6 +9,7 @@ use tokio::sync::Mutex;
 use uuid::Uuid;
 use kbs_protocol::keypair::TeeKeyPair;
 use kbs_types::TeePubKey;
+use sha2::{Digest, Sha384};
 use crate::http::Error;
 use crate::session::{Session, SessionMap};
 
@@ -46,8 +47,8 @@ pub(crate) async fn get_evidence(
         .map_err(|e| Error::EvidenceIssueFailed(format!("New TeeKeyPair failed {e}")))?;
     let tee_pubkey = tee_key.export_pubkey()
         .map_err(|e| Error::EvidenceIssueFailed(format!("Export TeePubKey failed {e}")))?;
-    let tee_pubkey_str = serde_json::to_string(&tee_pubkey)
-        .map_err(|e| Error::EvidenceIssueFailed(format!("Json TeePubKey failed {e}")))?;
+    //let tee_pubkey_str = serde_json::to_string(&tee_pubkey)
+    //    .map_err(|e| Error::EvidenceIssueFailed(format!("Json TeePubKey failed {e}")))?;
 
     let mut session = Session::default(30);
     session.set_authenticated();
@@ -69,7 +70,7 @@ pub(crate) async fn get_evidence(
     let challenge = params.get("challenge")
         .ok_or_else(|| Error::InvalidRequest(String::from("no `challenge` in url")))?
         .to_string();
-    let evidence_aa_rsp = get_evidence_from_aa(agent_service_url.as_str(), &challenge, &tee_pubkey_str)
+    let evidence_aa_rsp = get_evidence_from_aa(agent_service_url.as_str(), &challenge, tee_pubkey.clone())
         .await
         .map_err(|e| Error::EvidenceIssueFailed(format!("Get evidence form AA failed {e}")))?;
     info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence_aa_rsp = {:?}", evidence_aa_rsp);
@@ -88,7 +89,7 @@ pub(crate) async fn get_evidence(
         .body(evidence_rsp_str))
 }
 
-async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubkey: &str) -> anyhow::Result<EvidenceAARsp> {
+async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubkey: TeePubKey) -> anyhow::Result<EvidenceAARsp> {
     info!("confilesystem - get_evidence_from_aa(): agent_service_url = {:?}", agent_service_url);
     info!("confilesystem - get_evidence_from_aa(): challenge = {:?}", challenge);
     info!("confilesystem - get_evidence_from_aa(): tee_pubkey = {:?}", tee_pubkey);
@@ -122,18 +123,28 @@ async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubk
     Ok(evidence_aa_rsp)
 }
 
-fn get_runtime_data(challenge: &str, tee_pubkey: &str) -> String {
-    //TODO
+fn get_runtime_data(challenge: &str, tee_pubkey: TeePubKey) -> String {
+    // see:
+    // 1: attestation_service::verifier::challenge::evaluate
+    // 2: kbs_protocol::client::rcar_client::generate_evidence
+    /*
     let challenge_tee_pubkey = format!("{challenge}{tee_pubkey}");
     let runtime_data = attester::emulate::get_hash_48bites(&challenge_tee_pubkey);
+    */
+    let mut hasher = Sha384::new();
+    hasher.update(challenge);
+    hasher.update(&tee_pubkey.k_mod);
+    hasher.update(&tee_pubkey.k_exp);
+    let mut runtime_data = [0u8; 48];
+    runtime_data[..48].copy_from_slice(&hasher.finalize());
     //let runtime_data_str = String::from_utf8(runtime_data.to_vec()).unwrap();
     //let runtime_data_str = String::from_utf8_lossy(runtime_data.as_slice()).into_owned();
     let runtime_data_str = hex::encode(runtime_data.as_slice());
     let runtime_data_got = hex::decode(runtime_data_str.clone()).unwrap();
     //let runtime_data_got = runtime_data_str.clone().into_bytes();
-    info!("confilesystem - get_runtime_data(): runtime_data = {:?}", runtime_data);
-    info!("confilesystem - get_runtime_data(): runtime_data_str = {:?}", runtime_data_str);
-    info!("confilesystem - get_runtime_data(): runtime_data_got = {:?}", runtime_data_got);
+    info!("confilesystem 1- get_runtime_data(): runtime_data = {:?}", runtime_data);
+    info!("confilesystem 0- get_runtime_data(): runtime_data_str = {:?}", runtime_data_str);
+    info!("confilesystem 1- get_runtime_data(): runtime_data_got = {:?}", runtime_data_got);
     return runtime_data_str;
 }
 
