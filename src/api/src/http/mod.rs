@@ -31,6 +31,7 @@ mod error;
 mod resource;
 
 mod evidence;
+mod ownership;
 
 #[cfg(feature = "as")]
 /// RESTful APIs that related to attestation
@@ -46,3 +47,4 @@ pub use resource::*;
 pub use error::*;
 
 pub use evidence::*;
+pub use ownership::*;

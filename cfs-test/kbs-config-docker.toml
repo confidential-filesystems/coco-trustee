@@ -1,6 +1,0 @@
-sockets = ["0.0.0.0:11111"]
-auth_public_key = "/cfs-kbs/public.pub"
-insecure_http = true
-
-[grpc_config]
-as_addr = "http://as:50004"

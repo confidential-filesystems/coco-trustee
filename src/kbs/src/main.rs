@@ -71,6 +71,9 @@ async fn main() -> Result<()> {
         #[cfg(feature = "opa")]
         kbs_config.policy_engine_config.unwrap_or_default(),
         kbs_config.agent_service_url,
+        kbs_config.kms_store_type,
+        kbs_config.ownership_cfg_file,
+        kbs_config.ownership_ctx_timeout_sec,
     )?;
 
     api_server.serve().await.map_err(anyhow::Error::from)

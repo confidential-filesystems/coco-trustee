@@ -107,8 +107,10 @@ pub(crate) async fn set_resource(
 
     let resource_bytes_cipher = serde_json::from_slice::<kbs_types::Response>(data.as_ref())
         .map_err(|e| Error::DecryptResourceDataFailed(format!("resource data error: {e}")))?;
+    info!("confilesystem - set_resource(): resource_bytes_cipher = {:?}", resource_bytes_cipher);
     let resource_bytes = session.tee_key().unwrap().decrypt_response(resource_bytes_cipher)
         .map_err(|e| Error::DecryptResourceDataFailed(format!("decrypt resource data failed: {e}")))?;
+    info!("confilesystem - set_resource(): resource_bytes = {:?}", resource_bytes);
     let resource_string = String::from_utf8(resource_bytes.clone())
         .map_err(|e| Error::DecryptResourceDataFailed(format!("get resource string failed: {e}")))?;
     info!("confilesystem - set_resource(): resource_string = {:?}", resource_string);
@@ -137,7 +139,7 @@ pub(crate) async fn set_resource(
         if is_cfs_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string())
-                .map_err(|e| Error::SetSecretFailed(format!("init cfs error: {e}")))?;
+                .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
             let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);

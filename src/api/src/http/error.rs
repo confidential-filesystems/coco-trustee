@@ -83,6 +83,21 @@ pub enum Error {
 
     #[error("Decrypt resource data failed: {0}")]
     DecryptResourceDataFailed(String),
+
+    #[error("Mint filesystem failed: {0}")]
+    MintFilesystemFailed(String),
+
+    #[error("Get filesystem failed: {0}")]
+    GetFilesystemFailed(String),
+
+    #[error("Burn filesystem failed: {0}")]
+    BurnFilesystemFailed(String),
+
+    #[error("Get Account MetaTx failed: {0}")]
+    GetAccountMetaTxFailed(String),
+
+    #[error("Get WellKnown Cfg failed: {0}")]
+    GetWellKnownCfgFailed(String),
 }
 
 /// For example, if we want to raise an error of `MissingCookie`

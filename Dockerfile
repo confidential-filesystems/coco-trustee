@@ -29,6 +29,6 @@ ENV INTEL_PCCS_USE_SECURE_CERT false
 RUN sed -i "s|\"pccs_url\":.*$|\"pccs_url\":$INTEL_PCCS_URL,|" /etc/sgx_default_qcnl.conf; \
     sed -i "s/\"use_secure_cert\":.*$/\"use_secure_cert\":$INTEL_PCCS_USE_SECURE_CERT,/" /etc/sgx_default_qcnl.conf
 
-COPY ./cfs-test /cfs-kbs
+COPY ./cfs-kbs /cfs-kbs
 WORKDIR /cfs-kbs
 ENTRYPOINT ["/cfs-kbs/run.sh"]

@@ -27,6 +27,7 @@ use resource::RepositoryConfig;
 use semver::{BuildMetadata, Prerelease, Version, VersionReq};
 use std::net::SocketAddr;
 use std::path::PathBuf;
+use attestation_service::cfs;
 #[cfg(feature = "resource")]
 use token::AttestationTokenVerifierType;
 
@@ -117,6 +118,9 @@ pub struct ApiServer {
     policy_engine_config: PolicyEngineConfig,
 
     agent_service_url: String,
+    kms_store_type: String,
+    ownership_cfg_file: String,
+    ownership_ctx_timeout_sec: i64,
 }
 
 impl ApiServer {
@@ -136,6 +140,9 @@ impl ApiServer {
         #[cfg(feature = "resource")] attestation_token_type: AttestationTokenVerifierType,
         #[cfg(feature = "policy")] policy_engine_config: PolicyEngineConfig,
         agent_service_url: String,
+        kms_store_type: String,
+        ownership_cfg_file: String,
+        ownership_ctx_timeout_sec: i64,
     ) -> Result<Self> {
         if !insecure && (private_key.is_none() || certificate.is_none()) {
             bail!("Missing HTTPS credentials");
@@ -166,6 +173,9 @@ impl ApiServer {
             #[cfg(feature = "policy")]
             policy_engine_config,
             agent_service_url,
+            kms_store_type,
+            ownership_cfg_file,
+            ownership_ctx_timeout_sec,
         })
     }
 
@@ -236,6 +246,16 @@ impl ApiServer {
             self.sockets
         );
 
+        // init cfs to cgo ...
+        match cfs::Cfs::init_cfs(self.kms_store_type.clone(), self.ownership_cfg_file.clone(), self.ownership_ctx_timeout_sec) {
+            Ok(_) => {
+                log::info!("*** *** cfs::Cfs::init_cfs() -> Ok")
+            },
+            Err(e) => {
+                log::warn!("*** *** cfs::Cfs::init_cfs() -> Err: e = {:?}", e)
+            }
+        }
+
         #[cfg(feature = "as")]
         let attestation_service = web::Data::new(self.attestation_service.clone());
 
@@ -278,6 +298,11 @@ impl ApiServer {
                 .app_data(web::Data::new(http_timeout))
                 .app_data(web::Data::new(user_public_key.clone()))
                 .app_data(web::Data::new(insecure_api));
+
+            // for cfs to go
+            server_app = server_app.app_data(web::Data::clone(&sessions))
+                .app_data(web::Data::clone(&agent_service_url))
+                .service(web::resource(kbs_path!("mint-filesystem")).route(web::post().to(http::mint_filesystem)));
 
             cfg_if::cfg_if! {
                 if #[cfg(feature = "as")] {

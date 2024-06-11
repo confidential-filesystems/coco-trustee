@@ -1,0 +1,25 @@
+log:
+  level: -1
+  logFile: /tmp/ownership-server.log
+  maxSize: 20
+  maxBackups: 7
+  maxAge: 7
+  localTime: true
+db:
+  host: 127.0.0.1
+  port: 5432
+  user: postgres
+  pass: 123456
+  dbName: postgres
+  sslMode: disable
+  maxIdleConns: 20
+  maxOpenConns: 200
+  debug: true
+  logLevel: 4
+metaTx:
+  chainId: 31337
+  chainNumber: 0
+  eip712Name: "cofs"
+  eip712Version: "1"
+  forwarderContract: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+  filesystemContract: "0x0165878A594ca255338adfa4d48449f69242Eb8F"

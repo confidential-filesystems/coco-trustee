@@ -1,0 +1,11 @@
+sockets = ["0.0.0.0:11111"]
+auth_public_key = "/cfs-kbs/public.pub"
+insecure_http = true
+
+agent_service_url = "http://127.0.0.1:8006"
+kms_store_type = "file"
+ownership_cfg_file = "/cfs-kbs/ownership-config-no.yaml"
+ownership_ctx_timeout_sec = 120
+
+[grpc_config]
+as_addr = "http://as:50004"

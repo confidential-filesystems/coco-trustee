@@ -28,6 +28,9 @@ const DEFAULT_INSECURE_HTTP: bool = false;
 const DEFAULT_SOCKET: &str = "127.0.0.1:8080";
 const DEFAULT_TIMEOUT: i64 = 5;
 const DEFAULT_AGENT_SERVICE_URL: &str = "http://127.0.0.1:8006";
+const DEFAULT_KMS_STORE_TYPE: &str = "file";
+const DEFAULT_OWNERSHIP_CFG_FILE: &str = "/cfs/ownership-config.yaml";
+const DEFAULT_OWNERSHIP_CTX_TIMEOUT_SEC: i64 = 180;
 
 /// Contains all configurable KBS properties.
 #[derive(Clone, Debug, Deserialize)]
@@ -87,6 +90,10 @@ pub struct KbsConfig {
 
     /// kata agent api rest service url.
     pub agent_service_url: String,
+    // for cfs
+    pub kms_store_type: String,
+    pub ownership_cfg_file: String,
+    pub ownership_ctx_timeout_sec: i64,
 }
 
 impl TryFrom<&Path> for KbsConfig {
@@ -102,6 +109,9 @@ impl TryFrom<&Path> for KbsConfig {
             .set_default("sockets", vec![DEFAULT_SOCKET])?
             .set_default("timeout", DEFAULT_TIMEOUT)?
             .set_default("agent_service_url", DEFAULT_AGENT_SERVICE_URL)?
+            .set_default("kms_store_type", DEFAULT_KMS_STORE_TYPE)?
+            .set_default("ownership_cfg_file", DEFAULT_OWNERSHIP_CFG_FILE)?
+            .set_default("ownership_ctx_timeout_sec", DEFAULT_OWNERSHIP_CTX_TIMEOUT_SEC)?
             .add_source(File::with_name(config_path.to_str().unwrap()))
             .build()?;
 

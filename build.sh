@@ -70,20 +70,20 @@ fi
 
 # run kbs service
 echo "" && echo "" && echo ""
-mkdir -p ./cfs-test/lib
-rm -f ./cfs-test/lib/libcfs.so
-rm -f ./cfs-test/kbs
-rm -f ./cfs-test/kbs-client
-cp ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ./cfs-test/lib/
-cp ./target/release/kbs ./cfs-test/
-cp ./target/release/kbs-client ./cfs-test/
+mkdir -p ./cfs-kbs/lib
+rm -f ./cfs-kbs/lib/libcfs.so
+rm -f ./cfs-kbs/kbs
+rm -f ./cfs-kbs/kbs-client
+cp ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ./cfs-kbs/lib/
+cp ./target/release/kbs ./cfs-kbs/
+cp ./target/release/kbs-client ./cfs-kbs/
 
 if [ ${Op} = "update" ]; then
   echo "" && echo "" && echo ""
   export AA_EMULATE_ATTESTER=yes
   export CFS_EMULATED_MODE=true
-  export LD_LIBRARY_PATH=${CurrDir}/cfs-test/lib
-  ./target/release/kbs --config-file ./cfs-test/kbs-config.toml
+  export LD_LIBRARY_PATH=${CurrDir}/cfs-kbs/lib
+  ./target/release/kbs --config-file ./cfs-kbs/kbs-config.toml
 
 else
   echo "" && echo "" && echo ""
