@@ -303,9 +303,14 @@ impl ApiServer {
             server_app = server_app.app_data(web::Data::clone(&sessions))
                 .app_data(web::Data::clone(&agent_service_url))
                 .service(web::resource(kbs_path!("cfs/evidence")).route(web::get().to(http::get_evidence)))
-                .service(web::resource(kbs_path!("cfs/filesystems")).route(web::post().to(http::mint_filesystem)))
+                .service(
+                    web::resource([
+                        kbs_path!("cfs/filesystems"),
+                    ])
+                    .route(web::post().to(http::mint_filesystem))
+                    .route(web::delete().to(http::burn_filesystem)),
+                )
                 .service(web::resource(kbs_path!("cfs/filesystems/{name}")).route(web::get().to(http::get_filesystem)))
-                .service(web::resource(kbs_path!("cfs/filesystems")).route(web::delete().to(http::burn_filesystem)))
                 .service(web::resource(kbs_path!("cfs/accounts/{addr}/metatx")).route(web::get().to(http::get_account_metatx)))
                 .service(web::resource(kbs_path!("cfs/configure/.well-known")).route(web::get().to(http::get_wellknown)));
 
