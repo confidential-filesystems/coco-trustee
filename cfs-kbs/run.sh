@@ -14,8 +14,8 @@ export LD_LIBRARY_PATH=/cfs-kbs/lib
 
 #
 echo "" && echo "" && echo ""
-echo "run kbs error -> sleep 36000 ..."
-sleep 36000
+echo "run kbs error -> sleep ? ..."
+# sleep 3
 
 #
 exit 0
