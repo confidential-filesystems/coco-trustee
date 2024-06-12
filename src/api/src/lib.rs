@@ -299,10 +299,15 @@ impl ApiServer {
                 .app_data(web::Data::new(user_public_key.clone()))
                 .app_data(web::Data::new(insecure_api));
 
-            // for cfs to go
+            // for cfs to cgo
             server_app = server_app.app_data(web::Data::clone(&sessions))
                 .app_data(web::Data::clone(&agent_service_url))
-                .service(web::resource(kbs_path!("mint-filesystem")).route(web::post().to(http::mint_filesystem)));
+                .service(web::resource(kbs_path!("cfs/evidence")).route(web::get().to(http::get_evidence)))
+                .service(web::resource(kbs_path!("cfs/filesystems")).route(web::post().to(http::mint_filesystem)))
+                .service(web::resource(kbs_path!("cfs/filesystems/{name}")).route(web::get().to(http::get_filesystem)))
+                .service(web::resource(kbs_path!("cfs/filesystems")).route(web::delete().to(http::burn_filesystem)))
+                .service(web::resource(kbs_path!("cfs/accounts/{addr}/metatx")).route(web::get().to(http::get_account_metatx)))
+                .service(web::resource(kbs_path!("cfs/configure/.well-known")).route(web::get().to(http::get_wellknown)));
 
             cfg_if::cfg_if! {
                 if #[cfg(feature = "as")] {
@@ -311,7 +316,6 @@ impl ApiServer {
                     .app_data(web::Data::clone(&agent_service_url))
                     .service(web::resource(kbs_path!("auth")).route(web::post().to(http::auth)))
                     .service(web::resource(kbs_path!("attest")).route(web::post().to(http::attest)))
-                    .service(web::resource(kbs_path!("evidence")).route(web::get().to(http::get_evidence)))
                     .service(
                         web::resource(kbs_path!("attestation-policy"))
                             .route(web::post().to(http::attestation_policy)),

@@ -261,7 +261,7 @@ pub async fn set_resource(
     let http_client = build_http_client(kbs_root_certs_pem)?;
 
     // get evidence
-    let get_evidence_url = format!("{}/{KBS_URL_PREFIX}/evidence?challenge={}", url, challenge);
+    let get_evidence_url = format!("{}/{KBS_URL_PREFIX}/cfs/evidence?challenge={}", url, challenge);
     let get_evidence_response = http_client
         .get(get_evidence_url)
         .send()

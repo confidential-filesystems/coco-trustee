@@ -41,12 +41,34 @@ target/release/kbs-client \
   get-kbs-evidence --challenge 123456
 
 # ownership
+# cfs/filesystems
 curl -H "Content-Type:application/json" \
   -X POST \
   --data \
     '{"metaTxRequest":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"metaTxSignature":"err"}' \
-  http://127.0.0.1:11111/kbs/v0/mint-filesystem
+  http://127.0.0.1:11111/kbs/v0/cfs/filesystems
 
+# cfs/filesystems/{name}
+curl \
+  -X GET \
+  http://127.0.0.1:11111/kbs/v0/cfs/filesystems/fs1
+
+# cfs/filesystems
+curl -H "Content-Type:application/json" \
+  -X DELETE \
+  --data \
+    '{"metaTxRequest":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"metaTxSignature":"err"}' \
+  http://127.0.0.1:11111/kbs/v0/cfs/filesystems
+
+# cfs/accounts/{addr}/metatx
+curl \
+  -X GET \
+  http://127.0.0.1:11111/kbs/v0/cfs/accounts/0xabc/metatx
+
+# cfs/configure/.well-known
+curl \
+  -X GET \
+  http://127.0.0.1:11111/kbs/v0/cfs/configure/.well-known
 
 
 #end.

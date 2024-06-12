@@ -31,7 +31,7 @@ pub struct EvidenceRsp {
     pub evidence: Vec<u8>,
 }
 
-/// GET /evidence?challenge={}
+/// GET /cfs/evidence?challenge={}
 pub(crate) async fn get_evidence(
     request: HttpRequest,
     map: web::Data<SessionMap<'_>>,

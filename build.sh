@@ -77,6 +77,9 @@ rm -f ./cfs-kbs/kbs-client
 cp ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ./cfs-kbs/lib/
 cp ./target/release/kbs ./cfs-kbs/
 cp ./target/release/kbs-client ./cfs-kbs/
+chmod 755 ./cfs-kbs/kbs
+chmod 755 ./cfs-kbs/kbs-client
+chmod 755 ./cfs-kbs/run.sh
 
 if [ ${Op} = "update" ]; then
   echo "" && echo "" && echo ""
