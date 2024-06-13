@@ -73,7 +73,7 @@ pub(crate) async fn get_evidence(
     let evidence_aa_rsp = get_evidence_from_aa(agent_service_url.as_str(), &challenge, tee_pubkey.clone())
         .await
         .map_err(|e| Error::EvidenceIssueFailed(format!("Get evidence form AA failed {e}")))?;
-    info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence_aa_rsp = {:?}", evidence_aa_rsp);
+    //info!("confilesystem - get_evidence(): get_evidence_from_aa() -> evidence_aa_rsp = {:?}", evidence_aa_rsp);
 
     // return evidence and tee_pubkey
     let evidence_rsp = EvidenceRsp {
@@ -119,7 +119,7 @@ async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubk
     }
 
     let evidence_aa_rsp = res.json::<EvidenceAARsp>().await?;
-    info!("confilesystem - get_evidence_from_aa(): evidence_aa_rsp = {:?}", evidence_aa_rsp);
+    //info!("confilesystem - get_evidence_from_aa(): evidence_aa_rsp = {:?}", evidence_aa_rsp);
     Ok(evidence_aa_rsp)
 }
 

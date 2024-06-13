@@ -225,9 +225,11 @@ pub fn jwe(tee_pub_key: TeePubKey, payload_data: Vec<u8>) -> Result<Response> {
        "enc": AES_GCM_256_ALGORITHM.to_string(),
     });
 
+    let protected_json = serde_json::to_string(&protected_header)
+        .map_err(|e| Error::JWEFailed(format!("serde protected_header failed: {e}")))?;
+    let protected = URL_SAFE_NO_PAD.encode(protected_json);
     Ok(Response {
-        protected: serde_json::to_string(&protected_header)
-            .map_err(|e| Error::JWEFailed(format!("serde protected_header failed: {e}")))?,
+        protected,
         encrypted_key: URL_SAFE_NO_PAD.encode(wrapped_sym_key),
         iv: URL_SAFE_NO_PAD.encode(iv),
         ciphertext: URL_SAFE_NO_PAD.encode(encrypted_payload_data),

@@ -289,7 +289,8 @@ pub async fn set_resource(
 
     //let rsp = get_evidence_response.text().await?;
     let evidence = get_evidence_response.json::<EvidenceRsp>().await?;
-    println!("set_resource(): kbs_evidence() -> evidence = {:?}", evidence);
+    //println!("set_resource(): kbs_evidence() -> evidence = {:?}", evidence);
+    println!("set_resource(): kbs_evidence() -> evidence.tee_pubkey = {:?}", evidence.tee_pubkey);
     println!("set_resource(): kbs_evidence() -> evidence.tee_type = {:?}", evidence.tee_type);
     println!("set_resource(): kbs_evidence() -> kbs_types::Tee::Challenge = {:?}", kbs_types::Tee::Challenge);
 

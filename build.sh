@@ -94,18 +94,26 @@ else
   docker rmi -f ${KBSImage}
   docker build -f Dockerfile -t ${KBSImage} .
 
-  KBSContainer=coco-trustee-kbs
-  docker rm -f ${KBSContainer}
-  docker run -itd --privileged \
-  	--name=${KBSContainer} \
-  	--restart=always \
-  	-p 11111:11111 \
-  	${KBSImage} \
-  	/bin/bash
+  docker tag ${KBSImage} hub.confidentialfilesystems.com:4443/cc/${KBSImage}
+  docker push hub.confidentialfilesystems.com:4443/cc/${KBSImage}
 
-  docker ps -a | grep -i coco-trustee-kbs
+  echo "" && echo "" && echo ""
+  echo Op=${Op}
+  if [ ${Op} = "run-docker" ]; then
+    KBSContainer=coco-trustee-kbs
+    docker rm -f ${KBSContainer}
 
-  docker exec -it coco-trustee-kbs bash
+    docker run -itd --privileged \
+      --name=${KBSContainer} \
+      --restart=always \
+      -p 11111:11111 \
+      ${KBSImage} \
+      /bin/bash
+
+    docker ps -a | grep -i coco-trustee-kbs
+
+    docker exec -it coco-trustee-kbs bash
+  fi
 
 fi
 
