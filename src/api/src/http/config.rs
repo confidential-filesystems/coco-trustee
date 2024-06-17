@@ -166,8 +166,8 @@ pub(crate) async fn set_resource(
         }
     }
 
-    set_secret_resource(&repository, resource_description, resource_bytes.as_ref())
+    let set_rsp = set_secret_resource(&repository, resource_description, resource_bytes.as_ref())
         .await
         .map_err(|e| Error::SetSecretFailed(format!("{e}")))?;
-    Ok(HttpResponse::Ok().content_type("application/json").body(""))
+    Ok(HttpResponse::Ok().content_type("application/json").body(set_rsp))
 }

@@ -84,14 +84,14 @@ impl Repository for LocalFs {
         &mut self,
         resource_desc: ResourceDesc,
         data: &[u8],
-    ) -> Result<()> {
-        let set_res = self.cfsi.set_resource(resource_desc.repository_name.clone(),
+    ) -> Result<Vec<u8>> {
+        let set_rsp = self.cfsi.set_resource(resource_desc.repository_name.clone(),
                                             resource_desc.resource_type.clone(),
                                             resource_desc.resource_tag.clone(),
                                             data)
             .await?;
-        info!("confilesystem - cfsi.set_resource() -> set_res = {:?}", set_res);
-        Ok(())
+        info!("confilesystem - cfsi.set_resource() -> set_rsp = {:?}", set_rsp);
+        Ok(set_rsp)
 
         /*
         let mut resource_path = PathBuf::from(&self.repo_dir_path);

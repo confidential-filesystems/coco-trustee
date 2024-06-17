@@ -249,7 +249,7 @@ async fn main() -> Result<()> {
                     resource_file,
                 } => {
                     let resource_bytes = std::fs::read(resource_file)?;
-                    kbs_client::set_resource(
+                    let set_rsp = kbs_client::set_resource(
                         &cli.url,
                         &challenge,
                         auth_key.clone(),
@@ -261,6 +261,10 @@ async fn main() -> Result<()> {
                     println!(
                         "Set resource success \n resource: {}",
                         STANDARD.encode(resource_bytes)
+                    );
+                    println!(
+                        "set_rsp: {:?} -> to_string: {:?}",
+                        set_rsp.clone(), String::from_utf8(set_rsp).unwrap()
                     );
                 }
             }

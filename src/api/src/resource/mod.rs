@@ -23,7 +23,7 @@ pub trait Repository {
         &mut self,
         resource_desc: ResourceDesc,
         data: &[u8],
-    ) -> Result<()>;
+    ) -> Result<Vec<u8>>;
 }
 
 #[derive(Debug, Clone)]
@@ -87,7 +87,7 @@ pub(crate) async fn set_secret_resource(
     repository: &Arc<RwLock<dyn Repository + Send + Sync>>,
     resource_desc: ResourceDesc,
     data: &[u8],
-) -> Result<()> {
+) -> Result<Vec<u8>> {
     repository
         .write()
         .await

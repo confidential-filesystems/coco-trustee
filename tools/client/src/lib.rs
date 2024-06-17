@@ -253,7 +253,7 @@ pub async fn set_resource(
     resource_bytes: Vec<u8>,
     path: &str,
     kbs_root_certs_pem: Vec<String>,
-) -> Result<()> {
+) -> Result<Vec<u8>> {
     let auth_private_key = Ed25519KeyPair::from_pem(&auth_key)?;
     let claims = Claims::create(Duration::from_hours(2));
     let token = auth_private_key.sign(claims)?;
@@ -294,12 +294,14 @@ pub async fn set_resource(
     println!("set_resource(): kbs_evidence() -> evidence.tee_type = {:?}", evidence.tee_type);
     println!("set_resource(): kbs_evidence() -> kbs_types::Tee::Challenge = {:?}", kbs_types::Tee::Challenge);
 
+    //TODO:  verify evidence
+
     let jwe = api_server::http::jwe(evidence.tee_pubkey, resource_bytes)?;
     let resource_bytes_ciphertext = serde_json::to_vec(&jwe)?;
 
     //
     let resource_url = format!("{}/{KBS_URL_PREFIX}/resource/{}", url, path);
-    let res = http_client
+    let set_rsp = http_client
         .post(resource_url)
         .header("Content-Type", "application/octet-stream")
         .header("Cookie", last_cookie)
@@ -307,10 +309,13 @@ pub async fn set_resource(
         .body(resource_bytes_ciphertext.clone())
         .send()
         .await?;
-    match res.status() {
-        reqwest::StatusCode::OK => Ok(()),
+    match set_rsp.status() {
+        reqwest::StatusCode::OK => {
+            println!("set_resource(): set_rsp = {:?}", set_rsp);
+            Ok(set_rsp.bytes().await?.to_vec())
+        },
         _ => {
-            bail!("Request Failed, Response: {:?}", res.text().await?)
+            bail!("Request Failed, Response: {:?}", set_rsp.text().await?)
         }
     }
 }
