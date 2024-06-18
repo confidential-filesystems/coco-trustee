@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CurrDir=$(cd "$(dirname "$0")"; pwd)
+
 # kbs service
 # https://github.com/kata-containers/kata-containers/blob/main/docs/Developer-Guide.md#build-a-custom-kata-agent---optional
 export seccomp_install_path=/xxx/install/

@@ -133,10 +133,20 @@ pub(crate) async fn set_resource(
             .to_string(),
     };
 
+    let is_ownership_resource = resource_description.repository_name == "ownership";
     let is_cfs_resource = resource_description.resource_type == "seeds"
         && resource_description.resource_tag == "seeds";
+    info!("confilesystem20 - set_resource(): is_ownership_resource = {:?}, is_cfs_resource = {:?}",
+        is_ownership_resource, is_cfs_resource);
     if !insecure.get_ref() {
-        if is_cfs_resource {
+        if is_ownership_resource {
+            // skip auth check ?
+            // ownership/filesystems/mint
+            // ownership/filesystems/burn
+            // ownership/filesystems/:name
+            // ownership/accounts-metatx/:addr
+            // ownership/configure/.well-known
+        } else if is_cfs_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
