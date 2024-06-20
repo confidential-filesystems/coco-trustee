@@ -24,6 +24,7 @@ use super::*;
 /// GET /resource/{type}/{tag}
 pub(crate) async fn get_resource(
     request: HttpRequest,
+    data: web::Bytes,
     repository: web::Data<Arc<RwLock<dyn Repository + Send + Sync>>>,
     #[cfg(feature = "as")] map: web::Data<SessionMap<'_>>,
     token_verifier: web::Data<Arc<RwLock<dyn AttestationTokenVerifier + Send + Sync>>>,
@@ -47,6 +48,11 @@ pub(crate) async fn get_resource(
     })?;
 
     info!("confilesystem - get_resource(): claims = {:?}", claims);
+    let data_vec = data.as_ref().to_vec().clone();
+    let extra_request = std::str::from_utf8(&data_vec).map_err(|e| {
+        Error::InvalidRequest(format!("illegal extra request: {e}"))
+    })?;
+    info!("confilesystem - get_resource(): extra_request = {:?}", extra_request.clone());
 
     let pkey_value = claims
         .get("tee-pubkey")
@@ -109,7 +115,7 @@ pub(crate) async fn get_resource(
     let resource_byte = repository
         .read()
         .await
-        .read_secret_resource(resource_description)
+        .read_secret_resource(resource_description, extra_request)
         .await
         .map_err(|e| Error::ReadSecretFailed(e.to_string()))?;
 

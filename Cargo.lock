@@ -2453,6 +2453,7 @@ dependencies = [
 name = "kbs_protocol"
 version = "0.1.0"
 dependencies = [
+ "aes-gcm",
  "anyhow",
  "async-trait",
  "attester",
@@ -2461,8 +2462,10 @@ dependencies = [
  "jwt-simple",
  "kbs-types",
  "log",
+ "rand",
  "reqwest",
  "resource_uri",
+ "rsa 0.9.2",
  "serde",
  "serde_json",
  "sha2",

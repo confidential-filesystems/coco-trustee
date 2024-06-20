@@ -16,7 +16,7 @@ mod local_fs;
 #[async_trait::async_trait]
 pub trait Repository {
     /// Read secret resource from repository.
-    async fn read_secret_resource(&self, resource_desc: ResourceDesc) -> Result<Vec<u8>>;
+    async fn read_secret_resource(&self, resource_desc: ResourceDesc, extra_request: &str) -> Result<Vec<u8>>;
 
     /// Write secret resource into repository
     async fn write_secret_resource(
