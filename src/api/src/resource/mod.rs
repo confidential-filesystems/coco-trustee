@@ -24,6 +24,13 @@ pub trait Repository {
         resource_desc: ResourceDesc,
         data: &[u8],
     ) -> Result<Vec<u8>>;
+
+    /// Delete secret resource into repository
+    async fn delete_secret_resource(
+        &mut self,
+        resource_desc: ResourceDesc,
+        data: &[u8],
+    ) -> Result<Vec<u8>>;
 }
 
 #[derive(Debug, Clone)]
@@ -92,5 +99,17 @@ pub(crate) async fn set_secret_resource(
         .write()
         .await
         .write_secret_resource(resource_desc, data)
+        .await
+}
+
+pub(crate) async fn delete_secret_resource(
+    repository: &Arc<RwLock<dyn Repository + Send + Sync>>,
+    resource_desc: ResourceDesc,
+    data: &[u8],
+) -> Result<Vec<u8>> {
+    repository
+        .write()
+        .await
+        .delete_secret_resource(resource_desc, data)
         .await
 }

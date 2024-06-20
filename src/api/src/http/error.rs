@@ -66,6 +66,9 @@ pub enum Error {
     #[error("Set secret failed: {0}")]
     SetSecretFailed(String),
 
+    #[error("Delete secret failed: {0}")]
+    DeleteSecretFailed(String),
+
     #[error("Attestation token issue failed: {0}")]
     TokenIssueFailed(String),
 

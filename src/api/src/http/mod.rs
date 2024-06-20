@@ -8,7 +8,7 @@ use crate::auth::validate_auth;
 #[cfg(feature = "policy")]
 use crate::policy_engine::PolicyEngine;
 #[cfg(feature = "resource")]
-use crate::resource::{set_secret_resource, Repository, ResourceDesc};
+use crate::resource::{set_secret_resource, delete_secret_resource, Repository, ResourceDesc};
 #[cfg(feature = "as")]
 use crate::session::{Session, SessionMap, KBS_SESSION_ID};
 #[cfg(feature = "resource")]

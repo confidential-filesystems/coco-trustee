@@ -47,7 +47,7 @@ target/release/kbs-client \
 curl -H "Content-Type:application/json" \
   -X POST \
   --data \
-    '{"metaTxRequest":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"metaTxSignature":"err"}' \
+    '{"meta_tx_request":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"meta_tx_signature":"err"}' \
   ${ServiceUrl}/kbs/v0/cfs/filesystems
 
 # cfs/filesystems/{name}
@@ -59,7 +59,7 @@ curl \
 curl -H "Content-Type:application/json" \
   -X DELETE \
   --data \
-    '{"metaTxRequest":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"metaTxSignature":"err"}' \
+    '{"meta_tx_request":{"from":"err","to":"err","value":"err","gas":"err","nonce":"err","deadline":100,"data":"err"},"meta_tx_signature":"err"}' \
   ${ServiceUrl}/kbs/v0/cfs/filesystems
 
 # cfs/accounts/{addr}/metatx

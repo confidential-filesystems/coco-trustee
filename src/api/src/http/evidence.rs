@@ -13,6 +13,11 @@ use sha2::{Digest, Sha384};
 use crate::http::Error;
 use crate::session::{Session, SessionMap};
 
+pub const ATTESTER_SECURITY: &str = "security";
+pub const ATTESTER_CONTROLLER: &str = "controller";
+pub const ATTESTER_METADATA: &str = "metadata";
+pub const ATTESTER_WORKLOAD: &str = "workload";
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EvidenceAARsp {
     #[serde(rename = "tee-type")]
@@ -105,9 +110,10 @@ async fn get_evidence_from_aa(agent_service_url: &str, challenge: &str, tee_pubk
         "".to_string(),
         "".to_string(),
         "".to_string(),
-        "controller".to_string(),
+        ATTESTER_SECURITY.to_string(),
         "".to_string(),
     );
+    info!("confilesystem - get_evidence_from_aa(): extra_credential = {:?}", extra_credential);
     let res = http_client
         .get(get_evidence_url)
         .header("Content-Type", "application/json")

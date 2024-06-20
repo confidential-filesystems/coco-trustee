@@ -111,6 +111,20 @@ impl Repository for LocalFs {
             .context("write local fs")
         */
     }
+
+    async fn delete_secret_resource(
+        &mut self,
+        resource_desc: ResourceDesc,
+        data: &[u8],
+    ) -> Result<Vec<u8>> {
+        let delete_rsp = self.cfsi.delete_resource(resource_desc.repository_name.clone(),
+                                             resource_desc.resource_type.clone(),
+                                             resource_desc.resource_tag.clone(),
+                                             data)
+            .await?;
+        info!("confilesystem - cfsi.delete_resource() -> delete_rsp = {:?}", delete_rsp);
+        Ok(delete_rsp)
+    }
 }
 
 impl LocalFs {
