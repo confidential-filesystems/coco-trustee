@@ -10,6 +10,7 @@ export AA_EMULATE_ATTESTER=yes
 export CFS_EMULATED_MODE=true
 
 export LD_LIBRARY_PATH=/cfs-kbs/lib
+sleep 5 # wait db ???
 /cfs-kbs/kbs --config-file /cfs-kbs/kbs-config-docker.toml
 
 #
