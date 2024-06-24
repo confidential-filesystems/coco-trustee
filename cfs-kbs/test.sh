@@ -2,6 +2,18 @@
 
 CurrDir=$(cd "$(dirname "$0")"; pwd)
 
+# kbs kata-runtime add: kata-qemu-security
+vi /etc/containerd/config.toml
+
+vi /home/cfs/work/kevin.chen/k8s/cc/runtimeclass-cfs.yaml
+
+vi /home/cfs/work/kevin.chen/k8s/cc/install.sh
+
+./install.sh
+
+systemctl restart containerd
+
+
 # kbs service
 # https://github.com/kata-containers/kata-containers/blob/main/docs/Developer-Guide.md#build-a-custom-kata-agent---optional
 export seccomp_install_path=/xxx/install/

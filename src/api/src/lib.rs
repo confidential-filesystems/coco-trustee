@@ -252,7 +252,8 @@ impl ApiServer {
                 log::info!("*** *** cfs::Cfs::init_cfs() -> Ok")
             },
             Err(e) => {
-                log::warn!("*** *** cfs::Cfs::init_cfs() -> Err: e = {:?}", e)
+                log::warn!("*** *** cfs::Cfs::init_cfs() -> Err: e = {:?}", e);
+                return Err(anyhow!(" cfs::Cfs::init_cfs() -> err = {:?}", e));
             }
         }
 
