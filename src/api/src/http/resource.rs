@@ -68,7 +68,7 @@ pub(crate) async fn get_resource(
             .match_info()
             .get("repository")
             .unwrap_or("default")
-            .to_string(),
+            .to_string().to_lowercase(),
         resource_type: request
             .match_info()
             .get("type")

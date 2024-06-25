@@ -119,6 +119,7 @@ pub struct ApiServer {
 
     agent_service_url: String,
     kms_store_type: String,
+    kms_store_file_repo_dir: String,
     ownership_cfg_file: String,
     ownership_ctx_timeout_sec: i64,
 }
@@ -141,6 +142,7 @@ impl ApiServer {
         #[cfg(feature = "policy")] policy_engine_config: PolicyEngineConfig,
         agent_service_url: String,
         kms_store_type: String,
+        kms_store_file_repo_dir: String,
         ownership_cfg_file: String,
         ownership_ctx_timeout_sec: i64,
     ) -> Result<Self> {
@@ -174,6 +176,7 @@ impl ApiServer {
             policy_engine_config,
             agent_service_url,
             kms_store_type,
+            kms_store_file_repo_dir,
             ownership_cfg_file,
             ownership_ctx_timeout_sec,
         })
@@ -247,7 +250,7 @@ impl ApiServer {
         );
 
         // init cfs to cgo ...
-        match cfs::Cfs::init_cfs(self.kms_store_type.clone(), self.ownership_cfg_file.clone(), self.ownership_ctx_timeout_sec) {
+        match cfs::Cfs::init_cfs(self.kms_store_type.clone(), self.kms_store_file_repo_dir.clone(), self.ownership_cfg_file.clone(), self.ownership_ctx_timeout_sec) {
             Ok(_) => {
                 log::info!("*** *** cfs::Cfs::init_cfs() -> Ok")
             },

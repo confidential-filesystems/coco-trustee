@@ -97,7 +97,7 @@ pub(crate) async fn get_account_metatx(
         .match_info()
         .get("addr")
         .ok_or_else(|| Error::InvalidRequest(String::from("no `addr` in url")))?
-        .to_string();
+        .to_string().to_lowercase();
     info!("confilesystem - get_account_metatx(): account_addr = {:?}", account_addr);
 
     let cfsi = cfs::Cfs::new("".to_string())

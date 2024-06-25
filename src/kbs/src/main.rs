@@ -72,6 +72,7 @@ async fn main() -> Result<()> {
         kbs_config.policy_engine_config.unwrap_or_default(),
         kbs_config.agent_service_url,
         kbs_config.kms_store_type,
+        kbs_config.kms_store_file_repo_dir,
         kbs_config.ownership_cfg_file,
         kbs_config.ownership_ctx_timeout_sec,
     )?;

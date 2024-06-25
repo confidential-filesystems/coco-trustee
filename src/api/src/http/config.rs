@@ -120,7 +120,7 @@ pub(crate) async fn set_resource(
             .match_info()
             .get("repository")
             .unwrap_or("default")
-            .to_string(),
+            .to_string().to_lowercase(),
         resource_type: request
             .match_info()
             .get("type")
@@ -226,7 +226,7 @@ pub(crate) async fn delete_resource(
             .match_info()
             .get("repository")
             .unwrap_or("default")
-            .to_string(),
+            .to_string().to_lowercase(),
         resource_type: request
             .match_info()
             .get("type")
