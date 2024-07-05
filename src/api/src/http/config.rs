@@ -148,7 +148,7 @@ pub(crate) async fn set_resource(
             // GET ownership/configure/.well-known
         } else if is_cfs_resource {
             // validate seeds
-            let cfsi = attestation_service::cfs::Cfs::new("".to_string())
+            let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
             let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
@@ -254,7 +254,7 @@ pub(crate) async fn delete_resource(
             // GET ownership/configure/.well-known
         } else if is_cfs_resource {
             // validate seeds
-            let cfsi = attestation_service::cfs::Cfs::new("".to_string())
+            let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::DeleteSecretFailed(format!("new cfs error: {e}")))?;
             let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::DeleteSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;

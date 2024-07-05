@@ -4,7 +4,7 @@ CurrDir=$(cd "$(dirname "$0")"; pwd)
 
 #
 echo "" && echo "" && echo ""
-mkdir -p /opt/confidential-containers/kbs/cfs/repository
+mkdir -p /opt/confidential-containers/cfs/kbs/repository
 
 #export AA_EMULATE_ATTESTER=yes
 #export CFS_EMULATED_MODE=true

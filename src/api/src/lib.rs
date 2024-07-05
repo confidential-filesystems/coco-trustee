@@ -250,7 +250,8 @@ impl ApiServer {
         );
 
         // init cfs to cgo ...
-        match cfs::Cfs::init_cfs(self.kms_store_type.clone(), self.kms_store_file_repo_dir.clone(), self.ownership_cfg_file.clone(), self.ownership_ctx_timeout_sec) {
+        let mut cfs = cfs::Cfs::new("cfs_info".to_string(), self.kms_store_file_repo_dir.clone()).unwrap();
+        match cfs.init_cfs(self.kms_store_type.clone(), self.kms_store_file_repo_dir.clone(), self.ownership_cfg_file.clone(), self.ownership_ctx_timeout_sec) {
             Ok(_) => {
                 log::info!("*** *** cfs::Cfs::init_cfs() -> Ok")
             },

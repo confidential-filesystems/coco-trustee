@@ -22,7 +22,7 @@ pub(crate) async fn mint_filesystem(
         .map_err(|e| Error::MintFilesystemFailed(format!("mint request data error: {e}")))?;
     info!("confilesystem - mint_filesystem(): mint_req = {:?}", mint_req);
 
-    let cfsi = cfs::Cfs::new("".to_string())
+    let cfsi = cfs::Cfs::new("".to_string(), "".to_string())
         .map_err(|e| Error::MintFilesystemFailed(format!("new cfs error: {e}")))?;
     let mint_rsp = cfsi.mint_filesystem(&mint_req)
         .await
@@ -50,7 +50,7 @@ pub(crate) async fn get_filesystem(
         .to_string();
     info!("confilesystem - get_filesystem(): filesystem_name = {:?}", filesystem_name);
 
-    let cfsi = cfs::Cfs::new("".to_string())
+    let cfsi = cfs::Cfs::new("".to_string(), "".to_string())
         .map_err(|e| Error::GetFilesystemFailed(format!("new cfs error: {e}")))?;
     let get_rsp = cfsi.get_filesystem(&filesystem_name)
         .await
@@ -76,7 +76,7 @@ pub(crate) async fn burn_filesystem(
         .map_err(|e| Error::BurnFilesystemFailed(format!("burn request data error: {e}")))?;
     info!("confilesystem - burn_filesystem(): burn_req = {:?}", burn_req);
 
-    let cfsi = cfs::Cfs::new("".to_string())
+    let cfsi = cfs::Cfs::new("".to_string(), "".to_string())
         .map_err(|e| Error::BurnFilesystemFailed(format!("new cfs error: {e}")))?;
     let burn_rsp = cfsi.burn_filesystem(&burn_req)
         .await
@@ -100,7 +100,7 @@ pub(crate) async fn get_account_metatx(
         .to_string().to_lowercase();
     info!("confilesystem - get_account_metatx(): account_addr = {:?}", account_addr);
 
-    let cfsi = cfs::Cfs::new("".to_string())
+    let cfsi = cfs::Cfs::new("".to_string(), "".to_string())
         .map_err(|e| Error::GetAccountMetaTxFailed(format!("new cfs error: {e}")))?;
     let get_rsp = cfsi.get_account_metatx(&account_addr)
         .await
@@ -121,7 +121,7 @@ pub(crate) async fn get_wellknown(
 ) -> crate::http::Result<HttpResponse> {
     info!("confilesystem - get_wellknown(): request = {:?}", request);
 
-    let cfsi = cfs::Cfs::new("".to_string())
+    let cfsi = cfs::Cfs::new("".to_string(), "".to_string())
         .map_err(|e| Error::GetWellKnownCfgFailed(format!("new cfs error: {e}")))?;
     let get_rsp = cfsi.get_wellknown()
         .await

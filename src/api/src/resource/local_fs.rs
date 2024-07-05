@@ -130,12 +130,13 @@ impl Repository for LocalFs {
 
 impl LocalFs {
     pub fn new(repo_desc: &LocalFsRepoDesc) -> Result<Self> {
-        Ok(Self {
-            repo_dir_path: repo_desc
+        let repo_dir = repo_desc
                 .dir_path
                 .clone()
-                .unwrap_or(DEFAULT_REPO_DIR_PATH.to_string()),
-            cfsi: cfs::Cfs::new("".to_string())?,
+                .unwrap_or(DEFAULT_REPO_DIR_PATH.to_string());
+        Ok(Self {
+            repo_dir_path: repo_dir.clone(),
+            cfsi: cfs::Cfs::new("".to_string(), repo_dir.clone())?,
         })
     }
 }

@@ -38,7 +38,7 @@ spec:
                 command:
                   - sh
                   - -c
-                  - close_block_device.sh cfs-ceph /cfs/share/cfs
+                  - close_block_device.sh cfs-ceph /cfs/share/kbs
           readinessProbe:
             exec:
               command:
@@ -52,7 +52,7 @@ spec:
             - sh
             - -c
             - |-
-              open_block_device.sh /dev/block-ceph cfs-ceph /cfs/share/cfs DEVICE_PASSWORD
+              open_block_device.sh /dev/block-ceph cfs-ceph /cfs/share/kbs DEVICE_PASSWORD
               while true; do sleep 60; done
           env:
             - name: DEVICE_PASSWORD
@@ -96,7 +96,7 @@ spec:
             privileged: true
           volumeMounts:
             - name: cfs-share
-              mountPath: /opt/confidential-containers/kbs
+              mountPath: /opt/confidential-containers
             - name: tls-cfg
               mountPath: /etc/cc/kbs
               readOnly: true
@@ -129,7 +129,7 @@ spec:
                   name: cfs-kbs-secret
                   key: db_pwd
             - name: PGDATA
-              value: /var/lib/postgresql/cfs/pgdata
+              value: /var/lib/postgresql/kbs/pgdata
             - name: TZ
               value: Asia/Shanghai
           securityContext:
