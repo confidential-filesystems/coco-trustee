@@ -1,0 +1,176 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: cfs-kbs
+    app.kubernetes.io/instance: cfs-kbs
+    app.kubernetes.io/name: cfs-kbs
+    app.kubernetes.io/version: master
+  name: cfs-kbs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cfs-kbs
+      app.kubernetes.io/instance: cfs-kbs
+      app.kubernetes.io/name: cfs-kbs
+      app.kubernetes.io/version: master
+  template:
+    metadata:
+      annotations:
+        io.containerd.cri.runtime-handler: kata-qemu-security
+      labels:
+        app: cfs-kbs
+        app.kubernetes.io/instance: cfs-kbs
+        app.kubernetes.io/name: cfs-kbs
+        app.kubernetes.io/version: master
+        disable.sidecar.csi.confidentialfilesystems.com/inject: "true"
+    spec:
+      runtimeClassName: kata-qemu-security
+      restartPolicy: Always
+      containers:
+        - name: cfs-mount
+          image: hub.confidentialfilesystems.com:4443/cc/cfs-fuse:v0.0.1-d1
+          imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - close_block_device.sh cfs-ceph /cfs/share/cfs
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'mount | grep "/dev/mapper/cfs-ceph" && exit 0 || exit 1'
+            initialDelaySeconds: 0
+            periodSeconds: 5
+            failureThreshold: 3
+          command:
+            - sh
+            - -c
+            - |-
+              open_block_device.sh /dev/block-ceph cfs-ceph /cfs/share/cfs DEVICE_PASSWORD
+              while true; do sleep 60; done
+          env:
+            - name: DEVICE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: device_pwd
+          securityContext:
+            privileged: true
+          volumeDevices:
+            - name: block-volume-ceph
+              devicePath: /dev/block-ceph
+          volumeMounts:
+              - name: cfs-share
+                mountPath: /cfs/share
+                mountPropagation: Bidirectional
+        - name: kbs
+          image: hub.confidentialfilesystems.com:4443/cc/coco-trustee:v0.8.0-filesystem-d1
+          imagePullPolicy: Always
+          env:
+            - name: AA_EMULATE_ATTESTER
+              value: "yes"
+            - name: CFS_EMULATED_MODE
+              value: "true"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_user
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_pwd
+            - name: DB_DBNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_name
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cfs-share
+              mountPath: /opt/confidential-containers/kbs
+            - name: tls-cfg
+              mountPath: /etc/cc/kbs
+              readOnly: true
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+        - name: ownership-db
+          image: hub.confidentialfilesystems.com:4443/cc/postgres:12.3
+          imagePullPolicy: Always
+          env:
+            - name: POSTGRES_HOST
+              value: 127.0.0.1
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_name
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cfs-kbs-secret
+                  key: db_pwd
+            - name: PGDATA
+              value: /var/lib/postgresql/cfs/pgdata
+            - name: TZ
+              value: Asia/Shanghai
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: cfs-share
+              mountPath: /var/lib/postgresql
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 200Mi
+      volumes:
+        - name: cfs-share
+          emptyDir:
+            medium: Memory
+            sizeLimit: 10Mi
+        - name: block-volume-ceph
+          persistentVolumeClaim:
+            claimName: cfs-kbs-pvc
+        - name: tls-cfg
+          secret:
+            secretName: cfs-kbs-tls-secret
+            items:
+              - key: tls.crt
+                path: tls.crt
+              - key: tls.key
+                path: tls.key
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cfs-kbs-svc
+spec:
+  type: NodePort
+  ports:
+    - name: https-rest
+      port: 11111
+      nodePort: 31111
+      targetPort: 11111
+  selector:
+    app: cfs-kbs

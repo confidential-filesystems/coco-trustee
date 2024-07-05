@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cfs-kbs-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: K8S_STORAGE_SIZE
+  storageClassName: K8S_SC
+  volumeMode: Block

@@ -18,3 +18,7 @@ test/*
 
 config/private.key
 config/public.pub
+
+deploy/test.sh
+deploy/deploy-local.sh
+deploy/certs

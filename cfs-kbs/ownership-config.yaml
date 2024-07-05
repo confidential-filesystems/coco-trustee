@@ -8,12 +8,12 @@ log:
 db:
   host: 127.0.0.1
   port: 5432
-  user: postgres
-  pass: 123456
-  dbName: postgres
+  user: ""
+  pass: ""
+  dbName: ""
   sslMode: disable
   maxIdleConns: 20
-  maxOpenConns: 200
+  maxOpenConns: 100
   debug: true
   logLevel: 4
 metaTx:

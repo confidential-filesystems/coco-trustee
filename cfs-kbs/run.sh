@@ -4,10 +4,10 @@ CurrDir=$(cd "$(dirname "$0")"; pwd)
 
 #
 echo "" && echo "" && echo ""
-mkdir -p /opt/confidential-containers/kbs/repository
+mkdir -p /opt/confidential-containers/kbs/cfs/repository
 
-export AA_EMULATE_ATTESTER=yes
-export CFS_EMULATED_MODE=true
+#export AA_EMULATE_ATTESTER=yes
+#export CFS_EMULATED_MODE=true
 
 export LD_LIBRARY_PATH=/cfs-kbs/lib
 sleep 5 # wait db ???
