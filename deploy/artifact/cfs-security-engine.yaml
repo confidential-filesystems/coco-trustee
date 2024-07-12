@@ -2,27 +2,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: cfs-kbs
-    app.kubernetes.io/instance: cfs-kbs
-    app.kubernetes.io/name: cfs-kbs
+    app: cfs-security-engine
+    app.kubernetes.io/instance: cfs-security-engine
+    app.kubernetes.io/name: cfs-security-engine
     app.kubernetes.io/version: master
-  name: cfs-kbs
+  name: cfs-security-engine
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: cfs-kbs
-      app.kubernetes.io/instance: cfs-kbs
-      app.kubernetes.io/name: cfs-kbs
+      app: cfs-security-engine
+      app.kubernetes.io/instance: cfs-security-engine
+      app.kubernetes.io/name: cfs-security-engine
       app.kubernetes.io/version: master
   template:
     metadata:
       annotations:
         io.containerd.cri.runtime-handler: kata-qemu-security
       labels:
-        app: cfs-kbs
-        app.kubernetes.io/instance: cfs-kbs
-        app.kubernetes.io/name: cfs-kbs
+        app: cfs-security-engine
+        app.kubernetes.io/instance: cfs-security-engine
+        app.kubernetes.io/name: cfs-security-engine
         app.kubernetes.io/version: master
         disable.sidecar.csi.confidentialfilesystems.com/inject: "true"
     spec:
@@ -58,7 +58,7 @@ spec:
             - name: DEVICE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: device_pwd
           securityContext:
             privileged: true
@@ -80,17 +80,17 @@ spec:
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_user
             - name: DB_PASS
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_pwd
             - name: DB_DBNAME
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_name
           securityContext:
             privileged: true
@@ -116,17 +116,17 @@ spec:
             - name: POSTGRES_DB
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_name
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_user
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cfs-kbs-secret
+                  name: cfs-security-engine-secret
                   key: db_pwd
             - name: PGDATA
               value: /var/lib/postgresql/kbs/pgdata
@@ -151,10 +151,10 @@ spec:
             sizeLimit: 10Mi
         - name: block-volume-ceph
           persistentVolumeClaim:
-            claimName: cfs-kbs-pvc
+            claimName: cfs-security-engine
         - name: tls-cfg
           secret:
-            secretName: cfs-kbs-tls-secret
+            secretName: cfs-security-engine-tls-secret
             items:
               - key: tls.crt
                 path: tls.crt
@@ -164,7 +164,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: cfs-kbs-svc
+  name: cfs-security-engine
 spec:
   type: NodePort
   ports:
@@ -173,4 +173,4 @@ spec:
       nodePort: 31111
       targetPort: 11111
   selector:
-    app: cfs-kbs
+    app: cfs-security-engine
