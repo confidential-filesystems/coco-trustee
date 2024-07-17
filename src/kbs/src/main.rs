@@ -54,12 +54,17 @@ async fn main() -> Result<()> {
         }
     };
 
+    let insecure_http = match std::env::var("CFS_KBS_INSECURE_HTTP") {
+        Ok(val) if val.to_lowercase() == "true" => true,
+        _ => kbs_config.insecure_http,
+    };
+
     let api_server = ApiServer::new(
         kbs_config.sockets,
         kbs_config.private_key,
         kbs_config.auth_public_key,
         kbs_config.certificate,
-        kbs_config.insecure_http,
+        insecure_http,
         #[cfg(feature = "as")]
         &attestation_service,
         kbs_config.timeout,
