@@ -33,21 +33,19 @@ spec:
           image: hub.confidentialfilesystems.com:4443/cc/cfs-fuse:v0.0.1-d1
           imagePullPolicy: Always
           lifecycle:
+            postStart:
+              exec:
+                command:
+                  - sh
+                  - -c
+                  - i=1; while [ $i -le 30 ]; do mount | grep "/dev/mapper/cfs-ceph" && exit
+                    0 || sleep 3; i=$((i+1)); done; exit 1
             preStop:
               exec:
                 command:
                   - sh
                   - -c
                   - close_block_device.sh cfs-ceph /cfs/share/kbs
-          readinessProbe:
-            exec:
-              command:
-                - sh
-                - -c
-                - 'mount | grep "/dev/mapper/cfs-ceph" && exit 0 || exit 1'
-            initialDelaySeconds: 0
-            periodSeconds: 5
-            failureThreshold: 3
           command:
             - sh
             - -c
@@ -70,7 +68,7 @@ spec:
                 mountPath: /cfs/share
                 mountPropagation: Bidirectional
         - name: kbs
-          image: hub.confidentialfilesystems.com:4443/cc/coco-trustee:v0.8.0-filesystem-d1
+          image: hub.confidentialfilesystems.com:4443/cc/coco-trustee:v0.8.0-filesystem-d2
           imagePullPolicy: Always
           env:
             - name: AA_EMULATE_ATTESTER

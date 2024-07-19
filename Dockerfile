@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM debian:stable-slim as builder
 
 RUN apt-get update && \
     apt-get install -y \
@@ -16,7 +16,7 @@ RUN apt-get install -y --no-install-recommends \
     libsgx-dcap-default-qpl \
     libsgx-dcap-quote-verify \
     libtdx-attest \
-    tpm2-tools
+    tpm2-tools && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Intel PCCS URL Configurations
 # If you want the AS in KBS to connect to your customized PCCS for Intel TDX/SGX evidence verification,
@@ -29,6 +29,17 @@ ENV INTEL_PCCS_USE_SECURE_CERT false
 RUN sed -i "s|\"pccs_url\":.*$|\"pccs_url\":$INTEL_PCCS_URL,|" /etc/sgx_default_qcnl.conf; \
     sed -i "s/\"use_secure_cert\":.*$/\"use_secure_cert\":$INTEL_PCCS_USE_SECURE_CERT,/" /etc/sgx_default_qcnl.conf
 
+
+FROM debian:stable-slim
+
 COPY ./cfs-kbs /cfs-kbs
+COPY --from=builder /lib/x86_64-linux-gnu/libtdx_attest.so.1.21.100.3 /lib/x86_64-linux-gnu/libtdx_attest.so.1
+COPY --from=builder /lib/x86_64-linux-gnu/libsgx_dcap_quoteverify.so.1.13.101.3 /lib/x86_64-linux-gnu/libsgx_dcap_quoteverify.so.1
+COPY --from=builder /lib/x86_64-linux-gnu/libtss2-esys.so.0.0.0 /lib/x86_64-linux-gnu/libtss2-esys.so.0
+COPY --from=builder /lib/x86_64-linux-gnu/libtss2-tctildr.so.0.0.0 /lib/x86_64-linux-gnu/libtss2-tctildr.so.0
+COPY --from=builder /lib/x86_64-linux-gnu/libtss2-mu.so.0.0.0 /lib/x86_64-linux-gnu/libtss2-mu.so.0
+COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.3 /lib/x86_64-linux-gnu/libcrypto.so.3
+COPY --from=builder /lib/x86_64-linux-gnu/libtss2-sys.so.1 /lib/x86_64-linux-gnu/libtss2-sys.so.1
+
 WORKDIR /cfs-kbs
 ENTRYPOINT ["/cfs-kbs/run.sh"]
