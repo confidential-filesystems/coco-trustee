@@ -1,4 +1,4 @@
-sockets = ["0.0.0.0:11111"]
+sockets = ["0.0.0.0:8443"]
 auth_public_key = "./cfs-kbs/public.pub"
 insecure_http = true
 

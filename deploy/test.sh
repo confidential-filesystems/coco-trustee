@@ -31,7 +31,7 @@ export LD_LIBRARY_PATH=./cfs-kbs/lib
 
 # set
 export LD_LIBRARY_PATH=/home/cfs/work/herve.pang/cc/coco-trustee/cfs-kbs/lib
-#export ServiceUrl=http://127.0.0.1:11111
+#export ServiceUrl=http://127.0.0.1:8443
 export ServiceUrl=http://10.11.35.45:31111
 export ResPath=default/test/file1
 

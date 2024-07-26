@@ -106,7 +106,7 @@ else
     docker run -itd --privileged \
       --name=${KBSContainer} \
       --restart=always \
-      -p 11111:11111 \
+      -p 8443:8443 \
       ${KBSImage} \
       /bin/bash
 

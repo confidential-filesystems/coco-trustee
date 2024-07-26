@@ -167,8 +167,8 @@ spec:
   type: NodePort
   ports:
     - name: https-rest
-      port: 11111
+      port: 8443
       nodePort: 31111
-      targetPort: 11111
+      targetPort: 8443
   selector:
     app: cfs-security-engine
