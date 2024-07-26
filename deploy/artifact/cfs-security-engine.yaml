@@ -30,7 +30,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: cfs-mount
-          image: hub.confidentialfilesystems.com:4443/cc/cfs-fuse:v0.0.1-d1
+          image: hub.confidentialfilesystems.com:30443/cc/cfs-fuse:v0.0.1-d1
           imagePullPolicy: Always
           lifecycle:
             postStart:
@@ -68,7 +68,7 @@ spec:
                 mountPath: /cfs/share
                 mountPropagation: Bidirectional
         - name: kbs
-          image: hub.confidentialfilesystems.com:4443/cc/coco-trustee:v0.8.0-filesystem-d2
+          image: hub.confidentialfilesystems.com:30443/cc/coco-trustee:v0.8.0-filesystem-d2
           imagePullPolicy: Always
           env:
             - name: AA_EMULATE_ATTESTER
@@ -106,7 +106,7 @@ spec:
               cpu: 100m
               memory: 200Mi
         - name: ownership-db
-          image: hub.confidentialfilesystems.com:4443/cc/postgres:12.3
+          image: hub.confidentialfilesystems.com:30443/cc/postgres:12.3
           imagePullPolicy: Always
           env:
             - name: POSTGRES_HOST

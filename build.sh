@@ -94,8 +94,8 @@ else
   docker rmi -f ${KBSImage}
   docker build -f Dockerfile -t ${KBSImage} .
 
-  docker tag ${KBSImage} hub.confidentialfilesystems.com:4443/cc/${KBSImage}
-  docker push hub.confidentialfilesystems.com:4443/cc/${KBSImage}
+  docker tag ${KBSImage} hub.confidentialfilesystems.com:30443/cc/${KBSImage}
+  docker push hub.confidentialfilesystems.com:30443/cc/${KBSImage}
 
   echo "" && echo "" && echo ""
   echo Op=${Op}
