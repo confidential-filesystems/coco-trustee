@@ -15,7 +15,8 @@ path = "src/main.rs"
 [dependencies]
 # TODO: change it to "0.8.0", once released.
 #as-types = { git = "https://github.com/confidential-containers/attestation-service.git", tag = "v0.8.0", default-features = false }
-as-types = {path = "../../../coco-attestation-service/as-types"}
+as-types = { git = "https://github.com/confidential-filesystems/coco-attestation-service.git", branch = "v0.8.0-filesystem-snp", default-features = false }
+#as-types = {path = "../../../coco-attestation-service/as-types"}
 anyhow.workspace = true
 api-server.workspace = true
 base64.workspace = true
@@ -23,11 +24,17 @@ clap = { version = "4.0.29", features = ["derive"] }
 env_logger.workspace = true
 jwt-simple = "0.11.4"
 #kbs_protocol = { git = "https://github.com/confidential-containers/guest-components", tag = "v0.8.0" }
-kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
-attester = { path = "../../../coco-guest-components/attestation-agent/attester", default-features = false }
-kbs-types = { path = "../../../virtee-kbs-types"}
+#kbs_protocol = { path = "../../../coco-guest-components/attestation-agent/kbs_protocol"}
+#attester = { path = "../../../coco-guest-components/attestation-agent/attester", default-features = false }
+#kbs-types = { path = "../../../virtee-kbs-types"}
+kbs_protocol = { git = "https://github.com/confidential-filesystems/coco-guest-components", branch = "v0.8.0-filesystem-snp" }
+attester = { git = "https://github.com/confidential-filesystems/coco-guest-components", branch = "v0.8.0-filesystem-snp", default-features = false }
+kbs-types = { git = "https://github.com/confidential-filesystems/virtee-kbs-types", branch = "c90df0e-filesystem" }
 log.workspace = true
-reqwest = { version = "0.11.18", default-features = false, features = ["cookies", "json"] }
+reqwest = { version = "0.11.18", default-features = false, features = [
+    "cookies",
+    "json",
+] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json.workspace = true
 tokio.workspace = true
