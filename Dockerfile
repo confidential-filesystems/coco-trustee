@@ -32,6 +32,9 @@ RUN sed -i "s|\"pccs_url\":.*$|\"pccs_url\":$INTEL_PCCS_URL,|" /etc/sgx_default_
 
 FROM debian:stable-slim
 
+RUN apt-get update
+RUN apt-get install -y ca-certificates  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY ./cfs-kbs /cfs-kbs
 COPY --from=builder /lib/x86_64-linux-gnu/libtdx_attest.so.1.21.100.3 /lib/x86_64-linux-gnu/libtdx_attest.so.1
 COPY --from=builder /lib/x86_64-linux-gnu/libsgx_dcap_quoteverify.so.1.13.101.3 /lib/x86_64-linux-gnu/libsgx_dcap_quoteverify.so.1

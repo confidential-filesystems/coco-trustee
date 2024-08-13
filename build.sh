@@ -39,13 +39,13 @@ echo "" && echo "" && echo ""
 export seccomp_install_path=/xxx/install/
 export LIBSECCOMP_LIB_PATH="${seccomp_install_path}/lib"
 
-rm -f ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so
+rm -f ./target/release/build/attestation-service-63d208e5dd886fd5/out/libcfs.so
 rm -f ./target/release/kbs
 rm -f ./target/release/kbs-client
 make background-check-kbs POLICY_ENGINE=opa
 
 echo "" && echo "" && echo ""
-if [ -s ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ]; then
+if [ -s ./target/release/build/attestation-service-63d208e5dd886fd5/out/libcfs.so ]; then
 	echo "compile libcfs.so succ ."
 else
     echo "ERROR: compile libcfs.so fail !"
@@ -74,7 +74,7 @@ mkdir -p ./cfs-kbs/lib
 rm -f ./cfs-kbs/lib/libcfs.so
 rm -f ./cfs-kbs/kbs
 rm -f ./cfs-kbs/kbs-client
-cp ./target/release/build/attestation-service-7a54c39712a09156/out/libcfs.so ./cfs-kbs/lib/
+cp ./target/release/build/attestation-service-63d208e5dd886fd5/out/libcfs.so ./cfs-kbs/lib/
 cp ./target/release/kbs ./cfs-kbs/
 cp ./target/release/kbs-client ./cfs-kbs/
 chmod 755 ./cfs-kbs/kbs
