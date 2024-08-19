@@ -90,7 +90,7 @@ if [ ${Op} = "update" ]; then
 
 else
   echo "" && echo "" && echo ""
-  KBSImage=coco-trustee:v0.8.0-filesystem-d4
+  KBSImage=coco-trustee:v0.8.0-filesystem-d5
   docker rmi -f ${KBSImage}
   docker build -f Dockerfile -t ${KBSImage} .
 
