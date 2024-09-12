@@ -1,4 +1,4 @@
-FROM rust:1.75.0 as builder
+FROM rust:1.75.0
 
 RUN mkdir -p -m 0600 ~/.ssh && \
     ssh-keyscan -H github.com >> ~/.ssh/known_hosts
