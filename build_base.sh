@@ -7,6 +7,5 @@ HUB=confidentialfilesystems
 VERSION=${1:-v1.0.0}
 
 docker build -f ./coco-trustee-builder.dockerfile -t ${HUB}/${BASE_BUILDER_NAME}:${VERSION} .
-docker build -f ./coco-trustee-base.dockerfile -t ${HUB}/${BASE_IMAGE_NAME}:${VERSION} .
 
 echo "build time: $(date)"

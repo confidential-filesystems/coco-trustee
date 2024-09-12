@@ -2,5 +2,5 @@ target
 .github
 .git
 
-cfs-kbs/kbs-config.toml
+cfs-kbs/kbs-config-insecure.toml
 cfs-kbs/kbs-client
