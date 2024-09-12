@@ -26,5 +26,5 @@ COPY --from=builder /lib/x86_64-linux-gnu/libcrypto.so.3 /lib/x86_64-linux-gnu/l
 COPY --from=builder /lib/x86_64-linux-gnu/libtss2-sys.so.1 /lib/x86_64-linux-gnu/libtss2-sys.so.1
 
 WORKDIR /cfs-kbs
-RUN mkdir -p /opt/confidential-containers/kbs/repository
+
 ENTRYPOINT ["/cfs-kbs/kbs", "--config-file", "/cfs-kbs/kbs-config.toml"]
