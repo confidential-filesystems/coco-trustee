@@ -15,10 +15,12 @@ spec:
       app.kubernetes.io/instance: cfs-security-engine
       app.kubernetes.io/name: cfs-security-engine
       app.kubernetes.io/version: master
+  strategy:
+    type: Recreate
   template:
     metadata:
       annotations:
-        io.containerd.cri.runtime-handler: kata-qemu-security
+        io.containerd.cri.runtime-handler: kata-qemu-security-snp
       labels:
         app: cfs-security-engine
         app.kubernetes.io/instance: cfs-security-engine
@@ -26,11 +28,11 @@ spec:
         app.kubernetes.io/version: master
         disable.sidecar.csi.confidentialfilesystems.com/inject: "true"
     spec:
-      runtimeClassName: kata-qemu-security
+      runtimeClassName: kata-qemu-security-snp
       restartPolicy: Always
       containers:
         - name: cfs-mount
-          image: hub.confidentialfilesystems.com:30443/cc/cfs-fuse:v0.0.1-d1
+          image: hub.confidentialfilesystems.com:30443/cc/filesystem-sidecar:v0.1.4
           imagePullPolicy: Always
           lifecycle:
             postStart:
@@ -50,14 +52,15 @@ spec:
             - sh
             - -c
             - |-
+              set -e
               open_block_device.sh /dev/block-ceph cfs-ceph /cfs/share/kbs DEVICE_PASSWORD
               while true; do sleep 60; done
           env:
             - name: DEVICE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: device_pwd
+                  name: cfs-security-engine
+                  key: luksPass
           securityContext:
             privileged: true
           volumeDevices:
@@ -67,29 +70,23 @@ spec:
               - name: cfs-share
                 mountPath: /cfs/share
                 mountPropagation: Bidirectional
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 100Mi
         - name: kbs
-          image: hub.confidentialfilesystems.com:30443/cc/coco-trustee:v0.8.0-filesystem-d2
+          image: hub.confidentialfilesystems.com:30443/cc/coco-trustee:coco-trustee:v0.8.0-filesystem-d9
           imagePullPolicy: Always
           env:
             - name: AA_EMULATE_ATTESTER
               value: "yes"
             - name: CFS_EMULATED_MODE
               value: "true"
-            - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_user
-            - name: DB_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_pwd
-            - name: DB_DBNAME
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_name
+            - name: CFS_KBS_INSECURE_HTTP
+              value: "true"
           securityContext:
             privileged: true
           volumeMounts:
@@ -100,47 +97,10 @@ spec:
               readOnly: true
           resources:
             limits:
-              cpu: 2000m
-              memory: 2Gi
+              cpu: 1000m
+              memory: 1Gi
             requests:
-              cpu: 100m
-              memory: 200Mi
-        - name: ownership-db
-          image: hub.confidentialfilesystems.com:30443/cc/postgres:12.3
-          imagePullPolicy: Always
-          env:
-            - name: POSTGRES_HOST
-              value: 127.0.0.1
-            - name: POSTGRES_DB
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_name
-            - name: POSTGRES_USER
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_user
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: cfs-security-engine-secret
-                  key: db_pwd
-            - name: PGDATA
-              value: /var/lib/postgresql/kbs/pgdata
-            - name: TZ
-              value: Asia/Shanghai
-          securityContext:
-            privileged: true
-          volumeMounts:
-            - name: cfs-share
-              mountPath: /var/lib/postgresql
-          resources:
-            limits:
-              cpu: 2000m
-              memory: 2Gi
-            requests:
-              cpu: 100m
+              cpu: 200m
               memory: 200Mi
       volumes:
         - name: cfs-share

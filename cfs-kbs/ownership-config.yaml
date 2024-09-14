@@ -6,14 +6,9 @@ log:
   maxAge: 7
   localTime: true
 db:
-  host: 127.0.0.1
-  port: 5432
-  user: ""
-  pass: ""
-  dbName: ""
-  sslMode: disable
-  maxIdleConns: 20
-  maxOpenConns: 100
+  dbFile: /opt/confidential-containers/kbs/repository/resource.db
+  busyTimeout: 5000
+  autoCheckpoint: false
   debug: true
   logLevel: 4
 metaTx:

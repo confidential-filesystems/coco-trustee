@@ -1,4 +1,4 @@
-FROM confidentialfilesystems/coco-trustee-builder:v1.0.0 AS builder
+FROM confidentialfilesystems/coco-trustee-builder:v1.0.1 AS builder
 
 WORKDIR /usr/src
 COPY . coco-trustee

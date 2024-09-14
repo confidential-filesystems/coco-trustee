@@ -34,6 +34,6 @@ RUN apt-get update && \
     libsgx-dcap-quote-verify-dev \
     libtdx-attest-dev
 
-RUN wget https://go.dev/dl/go1.21.7.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go1.21.7.linux-amd64.tar.gz
+RUN wget https://go.dev/dl/go1.22.5.linux-amd64.tar.gz
+RUN tar -C /usr/local -xzf go1.22.5.linux-amd64.tar.gz
 ENV PATH "/usr/local/go/bin:${PATH}"
