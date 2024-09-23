@@ -95,6 +95,7 @@ pub(crate) async fn set_resource(
     insecure: web::Data<bool>,
     repository: web::Data<Arc<RwLock<dyn Repository + Send + Sync>>>,
 ) -> Result<HttpResponse> {
+    // TODO refactor the duplicated code
     let cookie = request.cookie(KBS_SESSION_ID).ok_or(Error::MissingCookie)?;
 
     let sessions = map.sessions.read().await;
@@ -134,36 +135,26 @@ pub(crate) async fn set_resource(
     };
 
     let is_ownership_resource = resource_description.repository_name == "ownership";
-    let is_cfs_resource = resource_description.resource_type == "seeds"
+    let is_cfs_seeds_resource = resource_description.resource_type == "seeds"
         && resource_description.resource_tag == "seeds";
-    info!("confilesystem20 - set_resource(): is_ownership_resource = {:?}, is_cfs_resource = {:?}",
-        is_ownership_resource, is_cfs_resource);
+    let is_cfs_commands_resource = resource_description.resource_type == "commands";
+    info!("confilesystem20 - set_resource(): is_ownership_resource = {:?}, is_cfs_seeds_resource = {:?}, is_cfs_commands_resource = {:?}",
+        is_ownership_resource, is_cfs_seeds_resource, is_cfs_commands_resource);
     if !insecure.get_ref() {
-        if is_ownership_resource {
-            // skip auth check ?
-            // POST ownership/filesystems/:name
-            // DELETE ownership/filesystems/:name
-            // GET ownership/filesystems/:name
-            // GET ownership/accounts_metatx/:addr
-            // GET ownership/configure/.well-known
-        } else if is_cfs_resource {
+         if is_cfs_seeds_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
             let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
-            /*
-            let output = Command::new("cfs-resource")
-                .arg("verify")
-                .arg("-s")
-                .arg(String::from_utf8_lossy(data.as_ref()).into_owned())
-                .output()
-                .expect("failed to execute process");
-            if !output.status.success() {
-                return Err(Error::SetSecretFailed(format!("{} seeds are invalid", resource_description.repository_name)));
-            }
-            */
+        } else if is_cfs_commands_resource {
+             // validate commands
+             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
+                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
+             let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+                 .map_err(|e| Error::SetSecretFailed(format!("{} commands are invalid: {e}", resource_description.repository_name)))?;
+             log::info!("confilesystem - cfsi.verify_commands() -> verify_res = {:?}", verify_res);
         } else {
             let user_pub_key = user_pub_key
                 .as_ref()
@@ -240,36 +231,26 @@ pub(crate) async fn delete_resource(
     };
 
     let is_ownership_resource = resource_description.repository_name == "ownership";
-    let is_cfs_resource = resource_description.resource_type == "seeds"
+    let is_cfs_seeds_resource = resource_description.resource_type == "seeds"
         && resource_description.resource_tag == "seeds";
-    info!("confilesystem20 - delete_resource(): is_ownership_resource = {:?}, is_cfs_resource = {:?}",
-        is_ownership_resource, is_cfs_resource);
+    let is_cfs_commands_resource = resource_description.resource_type == "commands";
+    info!("confilesystem20 - delete_resource(): is_ownership_resource = {:?}, is_cfs_seeds_resource = {:?}, is_cfs_commands_resource = {:?}",
+        is_ownership_resource, is_cfs_seeds_resource, is_cfs_commands_resource);
     if !insecure.get_ref() {
-        if is_ownership_resource {
-            // skip auth check ?
-            // POST ownership/filesystems/:name
-            // DELETE ownership/filesystems/:name
-            // GET ownership/filesystems/:name
-            // GET ownership/accounts_metatx/:addr
-            // GET ownership/configure/.well-known
-        } else if is_cfs_resource {
+        if is_cfs_seeds_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::DeleteSecretFailed(format!("new cfs error: {e}")))?;
             let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
                 .map_err(|e| Error::DeleteSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
-            /*
-            let output = Command::new("cfs-resource")
-                .arg("verify")
-                .arg("-s")
-                .arg(String::from_utf8_lossy(data.as_ref()).into_owned())
-                .output()
-                .expect("failed to execute process");
-            if !output.status.success() {
-                return Err(Error::DeleteSecretFailed(format!("{} seeds are invalid", resource_description.repository_name)));
-            }
-            */
+        } else if is_cfs_commands_resource {
+            // validate commands
+            let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
+                .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
+            let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+                .map_err(|e| Error::SetSecretFailed(format!("{} commands are invalid: {e}", resource_description.repository_name)))?;
+            log::info!("confilesystem - cfsi.verify_commands() -> verify_res = {:?}", verify_res);
         } else {
             let user_pub_key = user_pub_key
                 .as_ref()
