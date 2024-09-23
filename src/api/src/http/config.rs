@@ -145,14 +145,14 @@ pub(crate) async fn set_resource(
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
-            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned(), resource_description.repository_name.clone())
                 .map_err(|e| Error::SetSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
         } else if is_cfs_commands_resource {
              // validate commands
              let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                  .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
-             let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+             let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned(), resource_description.repository_name.clone())
                  .map_err(|e| Error::SetSecretFailed(format!("{} commands are invalid: {e}", resource_description.repository_name)))?;
              log::info!("confilesystem - cfsi.verify_commands() -> verify_res = {:?}", verify_res);
         } else {
@@ -241,14 +241,14 @@ pub(crate) async fn delete_resource(
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::DeleteSecretFailed(format!("new cfs error: {e}")))?;
-            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+            let verify_res = cfsi.verify_seeds(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned(), resource_description.repository_name.clone())
                 .map_err(|e| Error::DeleteSecretFailed(format!("{} seeds are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_seeds() -> verify_res = {:?}", verify_res);
         } else if is_cfs_commands_resource {
             // validate commands
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
-            let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned())
+            let verify_res = cfsi.verify_commands(String::from_utf8_lossy(resource_bytes.as_slice()).into_owned(), resource_description.repository_name.clone())
                 .map_err(|e| Error::SetSecretFailed(format!("{} commands are invalid: {e}", resource_description.repository_name)))?;
             log::info!("confilesystem - cfsi.verify_commands() -> verify_res = {:?}", verify_res);
         } else {
