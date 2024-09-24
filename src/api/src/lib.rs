@@ -317,7 +317,8 @@ impl ApiServer {
                 )
                 .service(web::resource(kbs_path!("cfs/filesystems/{name}")).route(web::get().to(http::get_filesystem)))
                 .service(web::resource(kbs_path!("cfs/accounts/{addr}/metatx")).route(web::get().to(http::get_account_metatx)))
-                .service(web::resource(kbs_path!("cfs/configure/.well-known")).route(web::get().to(http::get_wellknown)));
+                .service(web::resource(kbs_path!("cfs/configure/.well-known")).route(web::get().to(http::get_wellknown)))
+                .service(web::resource(kbs_path!("cfs/{addr}/commands/commands")).route(web::get().to(http::get_commands)));
 
             cfg_if::cfg_if! {
                 if #[cfg(feature = "as")] {

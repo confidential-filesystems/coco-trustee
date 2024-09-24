@@ -447,7 +447,7 @@ dependencies = [
 [[package]]
 name = "as-types"
 version = "0.1.0"
-source = "git+https://github.com/confidential-filesystems/coco-attestation-service.git?branch=v0.8.0-filesystem-snp#01dead8f990b24e3379dff2182c30239894e5922"
+source = "git+https://github.com/confidential-filesystems/coco-attestation-service.git?branch=v0.8.0-filesystem-snp#9618232064d106af802663ade69c9ffa525239d6"
 dependencies = [
  "kbs-types",
  "serde",
@@ -507,7 +507,7 @@ dependencies = [
 [[package]]
 name = "attestation-service"
 version = "0.1.0"
-source = "git+https://github.com/confidential-filesystems/coco-attestation-service.git?branch=v0.8.0-filesystem-snp#01dead8f990b24e3379dff2182c30239894e5922"
+source = "git+https://github.com/confidential-filesystems/coco-attestation-service.git?branch=v0.8.0-filesystem-snp#9618232064d106af802663ade69c9ffa525239d6"
 dependencies = [
  "anyhow",
  "as-types",

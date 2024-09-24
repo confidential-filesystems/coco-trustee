@@ -101,6 +101,9 @@ pub enum Error {
 
     #[error("Get WellKnown Cfg failed: {0}")]
     GetWellKnownCfgFailed(String),
+
+    #[error("Get commands failed: {0}")]
+    GetCommandsFailed(String),
 }
 
 /// For example, if we want to raise an error of `MissingCookie`
