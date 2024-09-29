@@ -141,7 +141,14 @@ pub(crate) async fn set_resource(
     info!("confilesystem20 - set_resource(): is_ownership_resource = {:?}, is_cfs_seeds_resource = {:?}, is_cfs_commands_resource = {:?}",
         is_ownership_resource, is_cfs_seeds_resource, is_cfs_commands_resource);
     if !insecure.get_ref() {
-         if is_cfs_seeds_resource {
+        if is_ownership_resource {
+            // skip auth check ?
+            // POST ownership/filesystems/:name
+            // DELETE ownership/filesystems/:name
+            // GET ownership/filesystems/:name
+            // GET ownership/accounts_metatx/:addr
+            // GET ownership/configure/.well-known
+        } else if is_cfs_seeds_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::SetSecretFailed(format!("new cfs error: {e}")))?;
@@ -237,7 +244,14 @@ pub(crate) async fn delete_resource(
     info!("confilesystem20 - delete_resource(): is_ownership_resource = {:?}, is_cfs_seeds_resource = {:?}, is_cfs_commands_resource = {:?}",
         is_ownership_resource, is_cfs_seeds_resource, is_cfs_commands_resource);
     if !insecure.get_ref() {
-        if is_cfs_seeds_resource {
+        if is_ownership_resource {
+            // skip auth check ?
+            // POST ownership/filesystems/:name
+            // DELETE ownership/filesystems/:name
+            // GET ownership/filesystems/:name
+            // GET ownership/accounts_metatx/:addr
+            // GET ownership/configure/.well-known
+        } else if is_cfs_seeds_resource {
             // validate seeds
             let cfsi = attestation_service::cfs::Cfs::new("".to_string(), "".to_string())
                 .map_err(|e| Error::DeleteSecretFailed(format!("new cfs error: {e}")))?;
